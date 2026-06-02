@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Retro Homelab — Free tools built by Don Reynolds. No tracking. No ads. Just useful apps.">
+<title>Retro Homelab</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0f1923;--surface:#1a2535;--border:#2d3f55;--text:#e8edf3;--text2:#a8b9cc;--text3:#6b8098;--accent:#b5294e;--accent2:#d4365f;}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;}
+.logo{font-size:3rem;margin-bottom:16px;animation:pulse 3s ease infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+h1{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;margin-bottom:8px;letter-spacing:-.5px;}
+.tagline{font-size:1rem;color:var(--text2);margin-bottom:48px;line-height:1.6;max-width:400px;}
+.projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:800px;width:100%;margin-bottom:48px;}
+.project-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:left;text-decoration:none;color:var(--text);transition:all .2s ease;display:block;}
+.project-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 32px rgba(181,41,78,.2);}
+.proj-icon{font-size:2.2rem;margin-bottom:12px;}
+.proj-title{font-family:'Lora',serif;font-size:1.2rem;font-weight:700;margin-bottom:6px;}
+.proj-desc{font-size:.88rem;color:var(--text2);line-height:1.5;margin-bottom:12px;}
+.proj-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(181,41,78,.15);color:var(--accent2);}
+.proj-link{display:inline-flex;align-items:center;gap:5px;font-size:.82rem;font-weight:600;color:var(--accent2);margin-top:12px;}
+.built-with{font-size:.8rem;color:var(--text3);text-align:center;padding:20px;}
+.built-with a{color:var(--text3);}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Lora',serif;font-size:1.1rem;font-weight:700;color:var(--text);}
+.nav-links{display:flex;gap:16px;}
+.nav-links a{font-size:.82rem;color:var(--text3);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">🖥️ Retro Homelab</div>
+  <div class="nav-links">
+    <a href="https://github.com/di00ib" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="logo">🖥️</div>
+  <h1>Retro Homelab</h1>
+  <p class="tagline">Free, private tools built as a hobby.<br>No tracking. No ads. No accounts required.</p>
+
+  <div class="projects">
+    <a href="https://heartjournal.retrohomelab.dev" class="project-card">
+      <div class="proj-icon">❤️</div>
+      <div class="proj-title">My Heart Journal</div>
+      <div class="proj-desc">A free blood pressure tracker that works on any device. Record readings, scan monitor photos, generate doctor reports, and set daily reminders.</div>
+      <div class="proj-tags">
+        <span class="tag">Free</span>
+        <span class="tag">Private</span>
+        <span class="tag">Works Offline</span>
+        <span class="tag">PWA</span>
+      </div>
+      <div class="proj-link">Open App →</div>
+    </a>
+
+    <div class="project-card" style="opacity:.5;cursor:default;">
+      <div class="proj-icon">🔧</div>
+      <div class="proj-title">More Coming Soon</div>
+      <div class="proj-desc">More free homelab tools in the works. Built slow, built right.</div>
+      <div class="proj-tags"><span class="tag">Coming Soon</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="built-with">
+  Built with ❤️ and <a href="https://claude.ai" target="_blank">Claude</a> ·
+  Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a> ·
+  DNS by <a href="https://cloudflare.com" target="_blank">Cloudflare</a>
+</div>
+
+</body>
+</html>
