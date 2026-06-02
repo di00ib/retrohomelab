@@ -2,79 +2,579 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Retro Homelab — Free tools built by Don Reynolds. No tracking. No ads. Just useful apps.">
-<title>Retro Homelab</title>
-<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="My Heart Journal">
+<meta name="theme-color" content="#b5294e">
+<title>My Heart Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#0f1923;--surface:#1a2535;--border:#2d3f55;--text:#e8edf3;--text2:#a8b9cc;--text3:#6b8098;--accent:#b5294e;--accent2:#d4365f;}
-body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;}
-.logo{font-size:3rem;margin-bottom:16px;animation:pulse 3s ease infinite;}
-@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
-h1{font-family:'Lora',serif;font-size:2.4rem;font-weight:700;margin-bottom:8px;letter-spacing:-.5px;}
-.tagline{font-size:1rem;color:var(--text2);margin-bottom:48px;line-height:1.6;max-width:400px;}
-.projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:800px;width:100%;margin-bottom:48px;}
-.project-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:left;text-decoration:none;color:var(--text);transition:all .2s ease;display:block;}
-.project-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 32px rgba(181,41,78,.2);}
-.proj-icon{font-size:2.2rem;margin-bottom:12px;}
-.proj-title{font-family:'Lora',serif;font-size:1.2rem;font-weight:700;margin-bottom:6px;}
-.proj-desc{font-size:.88rem;color:var(--text2);line-height:1.5;margin-bottom:12px;}
-.proj-tags{display:flex;gap:6px;flex-wrap:wrap;}
-.tag{font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(181,41,78,.15);color:var(--accent2);}
-.proj-link{display:inline-flex;align-items:center;gap:5px;font-size:.82rem;font-weight:600;color:var(--accent2);margin-top:12px;}
-.built-with{font-size:.8rem;color:var(--text3);text-align:center;padding:20px;}
-.built-with a{color:var(--text3);}
-.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);}
-.nav-logo{font-family:'Lora',serif;font-size:1.1rem;font-weight:700;color:var(--text);}
-.nav-links{display:flex;gap:16px;}
-.nav-links a{font-size:.82rem;color:var(--text3);text-decoration:none;transition:color .2s;}
-.nav-links a:hover{color:var(--text);}
+:root{--rose:#b5294e;--rose2:#d4365f;--rose-soft:#fdf0f3;--rose-pale:#fce8ed;--cream:#fdfaf7;--warm:#f5ede4;--warm2:#ece0d4;--text:#2c1a22;--text2:#5a3d48;--text3:#8a6a74;--border:#ddc8cf;--border2:#c9adb7;--surface:#fff;--surface2:#fdf5f7;--surface3:#f5e8ec;--normal:#2d7a4f;--elevated:#b07800;--stage1:#c05a00;--stage2:#b5294e;--crisis:#6b1fa8;--low:#1a5fa8;--radius:16px;--shadow:0 2px 16px rgba(181,41,78,.07);--shadow-lg:0 8px 40px rgba(181,41,78,.13);--fhead:'Lora',Georgia,serif;--fbody:'Source Sans 3','Segoe UI',system-ui,sans-serif;--tr:.22s ease;--fs:1rem;}
+[data-theme=dark]{--cream:#1a0f14;--warm:#221318;--warm2:#2c1a20;--text:#f5e8ed;--text2:#d4b8c2;--text3:#9a7a86;--border:#3d2030;--border2:#5a3040;--surface:#22101a;--surface2:#2c1822;--surface3:#381e2a;--rose-soft:#2c1018;--rose-pale:#380e1e;}
+[data-theme=large]{--fs:1.22rem;}
+[data-theme=contrast]{--cream:#000;--warm:#0a0a0a;--warm2:#111;--text:#fff;--text2:#eee;--text3:#ccc;--border:#fff;--surface:#111;--surface2:#1a1a1a;--rose:#ff3366;--normal:#00e676;--elevated:#ffd600;--stage1:#ff6d00;--stage2:#ff1744;--crisis:#d500f9;--low:#00b0ff;}
+*{box-sizing:border-box;margin:0;padding:0;}html{-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--fbody);font-size:var(--fs);background:var(--cream);color:var(--text);min-height:100vh;transition:background var(--tr),color var(--tr);}
+.wizard-wrap{position:fixed;inset:0;background:var(--cream);z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.wizard-card{background:var(--surface);border-radius:24px;padding:36px 32px;max-width:500px;width:100%;box-shadow:var(--shadow-lg);border:1px solid var(--border);}
+.wiz-step{display:none;animation:fadeIn .4s ease;}.wiz-step.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes heartbeat{0%,100%{transform:scale(1);}15%{transform:scale(1.15);}30%{transform:scale(1);}45%{transform:scale(1.08);}60%{transform:scale(1);}}
+.wiz-heart{font-size:4rem;text-align:center;margin-bottom:16px;animation:heartbeat 1.8s ease infinite;}
+.wiz-title{font-family:var(--fhead);font-size:1.8rem;font-weight:700;text-align:center;margin-bottom:8px;line-height:1.2;}
+.wiz-sub{font-size:1rem;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:24px;}
+.wiz-progress{display:flex;gap:6px;justify-content:center;margin-bottom:28px;}
+.wiz-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);transition:all var(--tr);}
+.wiz-dot.done{background:var(--rose);}.wiz-dot.current{background:var(--rose);transform:scale(1.3);}
+.storage-options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.stor-opt{border:2px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all var(--tr);background:var(--surface2);display:flex;align-items:flex-start;gap:12px;}
+.stor-opt:hover,.stor-opt.selected{border-color:var(--rose);background:var(--rose-soft);}
+.stor-opt.selected{box-shadow:0 0 0 3px var(--rose-pale);}
+.stor-ico{font-size:1.8rem;flex-shrink:0;}.stor-name{font-weight:700;font-size:1rem;color:var(--text);margin-bottom:2px;}.stor-desc{font-size:.85rem;color:var(--text2);line-height:1.4;}
+.stor-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;background:var(--normal);color:#fff;vertical-align:middle;}
+.setup-box{background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:16px;border:1px solid var(--border);}
+.setup-step{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;}
+.setup-num{width:26px;height:26px;border-radius:50%;background:var(--rose);color:#fff;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.setup-text{font-size:.9rem;color:var(--text2);line-height:1.5;}.setup-text a{color:var(--rose);font-weight:600;}.setup-text code{background:var(--surface3);padding:1px 6px;border-radius:4px;font-family:monospace;}
+.wiz-skip{text-align:center;margin-top:12px;}.wiz-skip a{color:var(--text3);font-size:.85rem;cursor:pointer;text-decoration:underline;}
+.shell{max-width:860px;margin:0 auto;padding:14px 14px 90px;}
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 14px;border-bottom:2px solid var(--border);margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo-heart{width:50px;height:50px;background:linear-gradient(135deg,var(--rose),var(--rose2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 16px rgba(181,41,78,.35);flex-shrink:0;animation:heartbeat 2.5s ease infinite;}
+.app-title{font-family:var(--fhead);font-size:1.7rem;font-weight:700;color:var(--text);}
+.app-sub{font-size:.72rem;color:var(--text3);margin-top:1px;}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sync-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:.72rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border2);background:var(--surface);color:var(--text3);transition:all var(--tr);}
+.sync-pill.synced{border-color:var(--normal);color:var(--normal);}.sync-pill.syncing{border-color:var(--elevated);color:var(--elevated);}.sync-pill.error{border-color:var(--stage2);color:var(--stage2);}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+.tab-bar{display:flex;gap:3px;background:var(--warm);border-radius:var(--radius);padding:4px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;border:1px solid var(--border);}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;padding:9px 14px;border-radius:10px;border:none;background:transparent;color:var(--text2);font-size:.83rem;font-weight:600;cursor:pointer;transition:all var(--tr);white-space:nowrap;font-family:var(--fbody);}
+.tab-btn.active{background:var(--surface);color:var(--rose);box-shadow:var(--shadow);font-weight:700;}
+.tab-btn:hover:not(.active){background:var(--surface2);}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:22px;margin-bottom:14px;}
+.card-title{font-family:var(--fhead);font-size:1.1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--text);}
+.fg{display:flex;flex-direction:column;gap:5px;}.fg.full{grid-column:1/-1;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;margin-bottom:12px;}
+label{font-size:.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;}
+input,select,textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:var(--warm);color:var(--text);font-family:var(--fbody);font-size:var(--fs);transition:all var(--tr);-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--rose);background:var(--surface);box-shadow:0 0 0 3px var(--rose-pale);}
+.bp-input{font-size:1.7rem;font-weight:700;text-align:center;padding:12px 8px;}
+textarea{resize:vertical;min-height:72px;}
+.help{font-size:.78rem;color:var(--text3);margin-top:3px;line-height:1.4;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:10px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:all var(--tr);white-space:nowrap;font-family:var(--fbody);}
+.btn-primary{background:linear-gradient(135deg,var(--rose),var(--rose2));color:#fff;box-shadow:0 3px 10px rgba(181,41,78,.35);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(181,41,78,.4);}
+.btn-sec{background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);}.btn-sec:hover{background:var(--warm2);}
+.btn-danger{background:transparent;color:var(--stage2);border:1.5px solid var(--stage2);}.btn-danger:hover{background:var(--rose-soft);}
+.btn-ghost{background:transparent;color:var(--rose);border:none;padding:8px 12px;}.btn-ghost:hover{background:var(--rose-soft);}
+.btn-lg{padding:14px 28px;font-size:1rem;border-radius:12px;}.btn-sm{padding:7px 13px;font-size:.8rem;}.btn-icon{padding:8px 10px;}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px;}
+.bp-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;font-size:.85rem;font-weight:700;margin-top:8px;}
+.s-normal{background:#e8f5ee;color:#1a5e35;}.s-elevated{background:#fff8e1;color:#7a5200;}.s-stage1{background:#fff3e0;color:#7a3500;}.s-stage2{background:#fde8ed;color:#8b001e;}.s-crisis{background:#f3e5ff;color:#4a0080;animation:blink 1.3s infinite;}.s-low{background:#e3f0ff;color:#0d3d7a;}.s-unknown{background:var(--surface2);color:var(--text3);}
+[data-theme=dark] .s-normal{background:#0d2a1a;color:#4ade80;}[data-theme=dark] .s-elevated{background:#2a1e00;color:#fbbf24;}[data-theme=dark] .s-stage1{background:#2a1200;color:#fb923c;}[data-theme=dark] .s-stage2{background:#2a0510;color:#f87171;}[data-theme=dark] .s-crisis{background:#1a0535;color:#d946ef;}[data-theme=dark] .s-low{background:#05183a;color:#60a5fa;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.6;}}
+.crisis-banner{background:linear-gradient(135deg,#6b1fa8,#9b2fc8);color:#fff;border-radius:12px;padding:16px 18px;margin-top:10px;display:none;}.crisis-banner.show{display:block;}
+.readings-list{display:flex;flex-direction:column;gap:10px;}
+.r-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;transition:all var(--tr);cursor:pointer;}
+.r-card:hover{border-color:var(--rose);box-shadow:var(--shadow);}
+.r-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}.r-bp{font-family:var(--fhead);font-size:1.5rem;font-weight:700;min-width:105px;}
+.r-info{flex:1;min-width:110px;}.r-date{font-size:.9rem;font-weight:700;color:var(--text2);}.r-detail{font-size:.76rem;color:var(--text3);margin-top:2px;}
+.r-note{flex:2;font-size:.82rem;color:var(--text2);min-width:120px;font-style:italic;}.r-actions{display:flex;gap:5px;margin-left:auto;}
+.stats-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.stat-box{flex:1;min-width:88px;background:var(--warm);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--border);}
+.stat-val{font-family:var(--fhead);font-size:1.4rem;font-weight:700;color:var(--text);}.stat-lbl{font-size:.68rem;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.4px;}
+.chart-wrap{position:relative;height:220px;width:100%;}
+.drop-zone{border:2.5px dashed var(--border2);border-radius:var(--radius);padding:34px;text-align:center;cursor:pointer;transition:all var(--tr);background:var(--warm);}
+.drop-zone:hover,.drop-zone.over{border-color:var(--rose);background:var(--rose-soft);}
+.drop-icon{font-size:3.2rem;margin-bottom:10px;}.drop-txt{color:var(--text2);font-size:.9rem;line-height:1.5;}
+.ocr-img{max-width:100%;max-height:280px;border-radius:10px;margin:10px 0;border:1.5px solid var(--border);}
+.ocr-raw{background:var(--warm);border-radius:8px;padding:12px;font-family:monospace;font-size:.8rem;color:var(--text2);max-height:120px;overflow-y:auto;margin:8px 0;white-space:pre-wrap;border:1px solid var(--border);}
+.prog-wrap{background:var(--warm2);border-radius:20px;height:8px;overflow:hidden;margin:8px 0;}.prog-fill{height:100%;background:linear-gradient(90deg,var(--rose),var(--rose2));border-radius:20px;transition:width .3s;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--rose);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.alarm-card{background:var(--warm);border:1.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.alarm-time{font-family:var(--fhead);font-size:1.6rem;font-weight:700;min-width:90px;color:var(--text);}
+.alarm-lbl{font-size:.9rem;color:var(--text2);flex:1;}.alarm-badge{font-size:.74rem;padding:3px 10px;border-radius:12px;font-weight:700;}
+.ab-active{background:#e8f5ee;color:#1a5e35;}.ab-muted{background:var(--surface3);color:var(--text3);}.ab-off{background:var(--surface3);color:var(--text3);}
+.alarm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px);}
+.alarm-box{background:var(--surface);border-radius:24px;padding:36px 28px;max-width:380px;width:100%;text-align:center;box-shadow:var(--shadow-lg);}
+.alarm-big-heart{font-size:4rem;animation:heartbeat 1s ease infinite;margin-bottom:12px;}
+.alarm-title{font-family:var(--fhead);font-size:1.5rem;font-weight:700;margin-bottom:8px;}.alarm-msg{color:var(--text2);font-size:.9rem;margin-bottom:20px;line-height:1.5;}
+.cloud-sec{background:var(--warm);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border);}
+.cloud-title{font-weight:700;font-size:.95rem;margin-bottom:5px;display:flex;align-items:center;gap:7px;color:var(--text);}
+.cloud-desc{font-size:.82rem;color:var(--text3);line-height:1.5;margin-bottom:10px;}
+.cloud-status{display:flex;align-items:center;gap:7px;font-size:.8rem;padding:8px 12px;border-radius:8px;margin-top:8px;font-weight:600;}
+.cs-ok{background:#e8f5ee;color:#1a5e35;}.cs-off{background:var(--surface3);color:var(--text3);}.cs-err{background:#fde8ed;color:#8b001e;}
+.help-section{margin-bottom:20px;}
+.help-section h3{font-family:var(--fhead);font-size:1.1rem;font-weight:700;color:var(--rose);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.help-step{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;}
+.help-num{width:30px;height:30px;border-radius:50%;background:var(--rose);color:#fff;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.help-text{font-size:.9rem;color:var(--text2);line-height:1.6;}.help-text strong{color:var(--text);}.help-text a{color:var(--rose);font-weight:600;}.help-text code{background:var(--surface3);padding:1px 6px;border-radius:4px;font-family:monospace;}
+.tip-box{background:var(--rose-soft);border-left:4px solid var(--rose);border-radius:0 10px 10px 0;padding:12px 14px;margin:12px 0;font-size:.85rem;color:var(--text2);line-height:1.5;}.tip-box strong{color:var(--rose);}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:10px;}
+.theme-opt{border:2px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;text-align:center;transition:all var(--tr);background:var(--surface);}
+.theme-opt:hover{border-color:var(--rose);transform:translateY(-2px);}.theme-opt.active{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-pale);}
+.swatch{width:100%;height:38px;border-radius:7px;margin-bottom:8px;display:flex;overflow:hidden;}.sw{flex:1;}.theme-name{font-size:.8rem;font-weight:700;color:var(--text2);}
+.mode-toggle{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--warm);border-radius:12px;border:1px solid var(--border);margin-bottom:10px;cursor:pointer;}
+.toggle-label{font-weight:700;font-size:.9rem;color:var(--text);}.toggle-sub{font-size:.78rem;color:var(--text3);margin-top:2px;}
+.toggle-pill{width:46px;height:26px;background:var(--border2);border-radius:13px;position:relative;transition:all var(--tr);}.toggle-pill.on{background:var(--rose);}
+.toggle-knob{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:all var(--tr);}.toggle-pill.on .toggle-knob{left:23px;}
+.ref-tbl{width:100%;border-collapse:collapse;font-size:.85rem;}
+.ref-tbl th,.ref-tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);}
+.ref-tbl th{font-weight:700;color:var(--text3);text-transform:uppercase;font-size:.7rem;background:var(--warm);}
+.ref-tbl tr:last-child td{border-bottom:none;}
+.doc-report-preview{background:var(--warm);border-radius:10px;padding:16px;font-size:.82rem;font-family:monospace;color:var(--text2);max-height:200px;overflow-y:auto;border:1px solid var(--border);white-space:pre;margin-top:10px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(4px);}
+.modal-box{background:var(--surface);border-radius:18px;padding:24px;width:100%;max-width:560px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:var(--fhead);font-size:1.15rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text3);line-height:1;}
+.divider{height:1px;background:var(--border);margin:16px 0;}.sec-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:6px;}
+.toast{position:fixed;bottom:24px;right:20px;background:var(--text);color:var(--cream);padding:12px 20px;border-radius:12px;font-size:.88rem;font-weight:700;z-index:9999;box-shadow:var(--shadow-lg);animation:slideUp .3s ease;max-width:300px;}
+@keyframes slideUp{from{transform:translateY(18px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.empty{text-align:center;padding:48px 18px;color:var(--text3);}.empty-ico{font-size:3rem;margin-bottom:12px;}
+.badge-new{display:inline-block;background:var(--normal);color:#fff;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;}
+@media(max-width:600px){.app-header{flex-direction:column;align-items:flex-start;}.grid{grid-template-columns:1fr 1fr;}.r-card{flex-direction:column;align-items:flex-start;}.r-actions{width:100%;justify-content:flex-end;}.wizard-card{padding:24px 18px;}}
 </style>
 </head>
 <body>
-
-<nav class="nav">
-  <div class="nav-logo">🖥️ Retro Homelab</div>
-  <div class="nav-links">
-    <a href="https://github.com/di00ib" target="_blank">GitHub</a>
+<!-- WIZARD -->
+<div class="wizard-wrap" id="wizard">
+<div class="wizard-card">
+<div class="wiz-progress"><div class="wiz-dot current" id="wdot0"></div><div class="wiz-dot" id="wdot1"></div><div class="wiz-dot" id="wdot2"></div><div class="wiz-dot" id="wdot3"></div></div>
+<div class="wiz-step active" id="wstep0">
+  <div class="wiz-heart">&#x2764;&#xFE0F;</div>
+  <div class="wiz-title">Welcome to My Heart Journal</div>
+  <div class="wiz-sub">A simple, private blood pressure tracker.<br>Free forever. No complicated setup required.<br><br>Takes about 2 minutes to get started.</div>
+  <button class="btn btn-primary btn-lg" style="width:100%" onclick="wizNext()">Get Started &rarr;</button>
+  <div class="wiz-skip"><a onclick="wizSkip()">I have used this before &mdash; skip setup</a></div>
+</div>
+<div class="wiz-step" id="wstep1">
+  <div class="wiz-heart" style="font-size:2.5rem">&#x1F464;</div>
+  <div class="wiz-title">First, tell us your name</div>
+  <div class="wiz-sub">This appears on your reports. Nothing is sent anywhere &mdash; it stays on your device.</div>
+  <div class="fg" style="margin-bottom:14px"><label>Your Name</label><input type="text" id="w-name" placeholder="e.g. Margaret Reynolds" style="font-size:1.1rem;padding:14px;"></div>
+  <div class="fg" style="margin-bottom:14px"><label>Your Doctor (optional)</label><input type="text" id="w-doc" placeholder="e.g. Dr. Sarah Johnson"></div>
+  <div class="fg" style="margin-bottom:20px"><label>Date of Birth (optional)</label><input type="date" id="w-dob"></div>
+  <button class="btn btn-primary btn-lg" style="width:100%" onclick="wizNext()">Continue &rarr;</button>
+</div>
+<div class="wiz-step" id="wstep2">
+  <div class="wiz-heart" style="font-size:2.5rem">&#x2601;&#xFE0F;</div>
+  <div class="wiz-title">Where should we save your readings?</div>
+  <div class="wiz-sub">Choose how your data is stored. You can change this later.</div>
+  <div class="storage-options">
+    <div class="stor-opt" data-stor="supabase" onclick="selectStor(this)"><div class="stor-ico">&#x1F5C4;&#xFE0F;</div><div><div class="stor-name">Supabase <span class="stor-badge">Recommended</span></div><div class="stor-desc">Free cloud database. Syncs automatically across all your devices. 5-minute setup. No monthly cost ever.</div></div></div>
+    <div class="stor-opt" data-stor="googledrive" onclick="selectStor(this)"><div class="stor-ico">&#x1F4C1;</div><div><div class="stor-name">Google Drive / OneDrive</div><div class="stor-desc">Save a backup file to your cloud storage. Good if you only use one device.</div></div></div>
+    <div class="stor-opt selected" data-stor="device" onclick="selectStor(this)"><div class="stor-ico">&#x1F4F1;</div><div><div class="stor-name">This Device Only</div><div class="stor-desc">No account needed. Readings stay on this device only.</div></div></div>
   </div>
-</nav>
+  <button class="btn btn-primary btn-lg" style="width:100%" onclick="wizNext()">Continue &rarr;</button>
+</div>
+<div class="wiz-step" id="wstep3">
+  <div class="wiz-heart" style="font-size:2.5rem">&#x2699;&#xFE0F;</div>
+  <div class="wiz-title" id="wstep3title">Set Up Cloud Sync</div>
+  <div id="wstep3content"></div>
+  <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" onclick="wizFinish()">Done &mdash; Start Using the App &rarr;</button>
+  <div class="wiz-skip"><a onclick="wizFinish()">Skip for now &mdash; set up later</a></div>
+</div>
+</div>
+</div>
 
-<div class="hero">
-  <div class="logo">🖥️</div>
-  <h1>Retro Homelab</h1>
-  <p class="tagline">Free, private tools built as a hobby.<br>No tracking. No ads. No accounts required.</p>
+<!-- MAIN APP -->
+<div class="shell" id="mainApp" style="display:none">
+<div class="app-header">
+  <div class="logo-wrap"><div class="logo-heart">&#x2764;&#xFE0F;</div><div><div class="app-title">My Heart Journal</div><div class="app-sub">Blood Pressure Tracker &middot; Personal Health Record</div></div></div>
+  <div class="hdr-right"><div class="sync-pill" id="syncPill" onclick="switchTab('cloud')"><div class="sync-dot"></div><span id="syncLabel">Device only</span></div><span id="readingCount" style="font-size:.78rem;color:var(--text3)">0 readings</span></div>
+</div>
+<div class="tab-bar">
+  <button class="tab-btn active" id="tbtn-add"      onclick="switchTab('add')">+ Add Reading</button>
+  <button class="tab-btn"        id="tbtn-history"  onclick="switchTab('history')">History</button>
+  <button class="tab-btn"        id="tbtn-chart"    onclick="switchTab('chart')">Trend</button>
+  <button class="tab-btn"        id="tbtn-ocr"      onclick="switchTab('ocr')">Scan Image</button>
+  <button class="tab-btn"        id="tbtn-alarm"    onclick="switchTab('alarm')">Reminders</button>
+  <button class="tab-btn"        id="tbtn-report"   onclick="switchTab('report')">Reports</button>
+  <button class="tab-btn"        id="tbtn-cloud"    onclick="switchTab('cloud')">Backup</button>
+  <button class="tab-btn"        id="tbtn-help"     onclick="switchTab('help')">Help</button>
+  <button class="tab-btn"        id="tbtn-settings" onclick="switchTab('settings')">Settings</button>
+</div>
 
-  <div class="projects">
-    <a href="https://heartjournal.retrohomelab.dev" class="project-card">
-      <div class="proj-icon">❤️</div>
-      <div class="proj-title">My Heart Journal</div>
-      <div class="proj-desc">A free blood pressure tracker that works on any device. Record readings, scan monitor photos, generate doctor reports, and set daily reminders.</div>
-      <div class="proj-tags">
-        <span class="tag">Free</span>
-        <span class="tag">Private</span>
-        <span class="tag">Works Offline</span>
-        <span class="tag">PWA</span>
-      </div>
-      <div class="proj-link">Open App →</div>
-    </a>
+<!-- ADD READING -->
+<div id="tab-add">
+<div class="card">
+  <div class="card-title">&#x2764;&#xFE0F; New Blood Pressure Reading</div>
+  <div class="grid">
+    <div class="fg"><label>Date</label><input type="date" id="f-date"></div>
+    <div class="fg"><label>Time</label><input type="time" id="f-time"></div>
+    <div class="fg"><label>AM or PM</label><select id="f-ampm"><option value="AM">AM (morning)</option><option value="PM">PM (afternoon/evening)</option></select></div>
+  </div>
+  <div class="divider"></div>
+  <div class="sec-label">Your Blood Pressure Numbers</div>
+  <div class="grid" style="align-items:end">
+    <div class="fg"><label>Top Number (Systolic)</label><input type="number" id="f-sys" class="bp-input" min="50" max="300" placeholder="120" oninput="liveStatus()"><div class="help">The higher number your monitor shows</div></div>
+    <div class="fg" style="align-items:center;justify-content:center;padding-top:20px"><span style="font-size:2rem;font-weight:700;color:var(--text3)">/</span></div>
+    <div class="fg"><label>Bottom Number (Diastolic)</label><input type="number" id="f-dia" class="bp-input" min="30" max="200" placeholder="80" oninput="liveStatus()"><div class="help">The lower number your monitor shows</div></div>
+    <div class="fg"><label>Heart Rate / Pulse (BPM)</label><input type="number" id="f-pulse" class="bp-input" min="30" max="250" placeholder="72"><div class="help">Beats per minute</div></div>
+  </div>
+  <div id="liveBadge" class="bp-badge s-unknown" style="margin-bottom:10px">Enter your numbers above and we will tell you what they mean</div>
+  <div class="crisis-banner" id="crisisBanner"><strong>&#x26A0;&#xFE0F; VERY HIGH BLOOD PRESSURE &mdash; Please seek medical help right away.</strong><br>Call your doctor, call 911, or go to the nearest emergency room immediately.</div>
+  <div class="divider"></div>
+  <div class="sec-label">Additional Details (optional but helpful)</div>
+  <div class="grid">
+    <div class="fg"><label>Which Arm?</label><select id="f-arm"><option value="">Not recorded</option><option value="Left">Left arm</option><option value="Right">Right arm</option><option value="Both">Both arms</option></select></div>
+    <div class="fg"><label>Body Position</label><select id="f-pos"><option value="">Not recorded</option><option value="Sitting">Sitting down</option><option value="Lying down">Lying down</option><option value="Standing">Standing up</option></select></div>
+    <div class="fg"><label>How Do You Feel?</label><select id="f-feel"><option value="">Not recorded</option><option value="Normal">Normal / Fine</option><option value="Dizzy">Dizzy or lightheaded</option><option value="Headache">Headache</option><option value="Tired">Tired or fatigued</option><option value="Anxious">Anxious or stressed</option><option value="Chest tightness">Chest tightness</option><option value="Other">Other</option></select></div>
+    <div class="fg"><label>Activity Before Reading</label><select id="f-activity"><option value="Resting">Resting / relaxing</option><option value="Light activity">Light activity</option><option value="Exercise">Exercise or walking</option><option value="After eating">Just ate a meal</option><option value="After caffeine">Had coffee or tea</option><option value="After alcohol">Had alcohol</option></select></div>
+    <div class="fg"><label>Did You Take Medication?</label><select id="f-medtaken"><option value="">Not applicable</option><option value="Yes - on time">Yes, on time</option><option value="Yes - late">Yes, but late</option><option value="No - forgot">No, I forgot today</option></select></div>
+    <div class="fg"><label>Medication Name</label><input type="text" id="f-medname" placeholder="e.g. Lisinopril 10mg"></div>
+    <div class="fg full"><label>Notes or Symptoms</label><textarea id="f-notes" placeholder="Write anything you want to remember &mdash; how you slept, stress level, any symptoms..."></textarea></div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary btn-lg" onclick="saveReading()">Save This Reading</button>
+    <button class="btn btn-sec" onclick="setNow()">Set Time to Right Now</button>
+    <button class="btn btn-ghost" onclick="clearForm()">Clear Form</button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">What Do Your Numbers Mean?</div>
+  <table class="ref-tbl">
+    <tr><th>Category</th><th>Top Number</th><th>Bottom Number</th><th>What to Do</th></tr>
+    <tr style="color:var(--low)"><td><strong>Low</strong></td><td>Below 90</td><td>Below 60</td><td>Talk to your doctor</td></tr>
+    <tr style="color:var(--normal)"><td><strong>Normal</strong></td><td>90 to 119</td><td>60 to 79</td><td>Great! Keep it up</td></tr>
+    <tr style="color:var(--elevated)"><td><strong>Elevated</strong></td><td>120 to 129</td><td>Below 80</td><td>Healthy lifestyle changes</td></tr>
+    <tr style="color:var(--stage1)"><td><strong>High &mdash; Stage 1</strong></td><td>130 to 139</td><td>80 to 89</td><td>Talk to your doctor</td></tr>
+    <tr style="color:var(--stage2)"><td><strong>High &mdash; Stage 2</strong></td><td>140 to 179</td><td>90 to 119</td><td>See your doctor soon</td></tr>
+    <tr style="color:var(--crisis)"><td><strong>Crisis</strong></td><td>180 or higher</td><td>120 or higher</td><td>Emergency care NOW</td></tr>
+  </table>
+  <div class="tip-box" style="margin-top:12px"><strong>Tip:</strong> Take your blood pressure at the same time every day, after sitting quietly for 5 minutes. This app is for personal tracking only &mdash; always talk to your doctor about your results.</div>
+</div>
+</div>
 
-    <div class="project-card" style="opacity:.5;cursor:default;">
-      <div class="proj-icon">🔧</div>
-      <div class="proj-title">More Coming Soon</div>
-      <div class="proj-desc">More free homelab tools in the works. Built slow, built right.</div>
-      <div class="proj-tags"><span class="tag">Coming Soon</span></div>
+<!-- HISTORY -->
+<div id="tab-history" style="display:none">
+<div class="card">
+  <div class="card-title">All Your Readings</div>
+  <div class="stats-row" id="statsRow"></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+    <input type="text" id="hSearch" placeholder="Search your readings..." style="flex:1;min-width:150px" oninput="renderHistory()">
+    <select id="hSort" onchange="renderHistory()" style="width:auto"><option value="desc">Newest First</option><option value="asc">Oldest First</option></select>
+    <select id="hFilter" onchange="renderHistory()" style="width:auto"><option value="all">All Readings</option><option value="Normal">Normal only</option><option value="Elevated">Elevated only</option><option value="Stage 1">Stage 1 only</option><option value="Stage 2">Stage 2 only</option><option value="Crisis">Crisis only</option><option value="Low">Low only</option></select>
+  </div>
+  <div id="readingsList" class="readings-list"></div>
+</div>
+</div>
+
+<!-- CHART -->
+<div id="tab-chart" style="display:none">
+<div class="card">
+  <div class="card-title">Your Blood Pressure Over Time</div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+    <label style="text-transform:none;font-size:.88rem;color:var(--text2);font-weight:normal">Show last:</label>
+    <select id="chartRange" onchange="renderChart()" style="width:auto"><option value="7">7 readings</option><option value="14">14 readings</option><option value="30" selected>30 readings</option><option value="all">All readings</option></select>
+  </div>
+  <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
+  <div style="font-size:.78rem;color:var(--text3);margin-top:10px">Red = Top number &nbsp; Blue = Bottom number &nbsp; Green = Pulse</div>
+</div>
+</div>
+
+<!-- OCR -->
+<div id="tab-ocr" style="display:none">
+<div class="card">
+  <div class="card-title">Scan a Photo of Your Monitor</div>
+  <p style="color:var(--text2);font-size:.9rem;margin-bottom:14px;line-height:1.6">Take a photo of your blood pressure monitor, then tap below. The app will try to read the numbers for you. You can always fix mistakes before saving.</p>
+  <div class="drop-zone" id="ocrDrop" onclick="document.getElementById('ocrFile').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event)">
+    <div class="drop-icon">&#x1F4F7;</div>
+    <div class="drop-txt"><strong>Tap here to choose a photo</strong><br>Or drag and drop a screenshot here</div>
+  </div>
+  <input type="file" id="ocrFile" accept="image/*" style="display:none" onchange="handleOcrFile(this.files[0])">
+  <div id="ocrContent" style="display:none">
+    <img id="ocrImg" class="ocr-img" alt="Your BP monitor photo">
+    <div id="ocrLoading" style="display:none;text-align:center;padding:20px"><div class="spinner"></div><div style="color:var(--text2);font-size:.9rem;margin-top:10px" id="ocrLoadTxt">Reading your photo...</div><div class="prog-wrap"><div class="prog-fill" id="ocrProg" style="width:0%"></div></div></div>
+    <div id="ocrResult" style="display:none">
+      <div class="sec-label" style="margin-top:14px">Text found in your photo:</div>
+      <div class="ocr-raw" id="ocrRaw"></div>
+      <div class="tip-box"><strong>Check these numbers carefully!</strong> Always compare to your actual monitor and fix anything wrong before saving.</div>
+      <div class="grid"><div class="fg"><label>Top Number</label><input type="number" id="ocr-sys" class="bp-input" placeholder="120"></div><div class="fg"><label>Bottom Number</label><input type="number" id="ocr-dia" class="bp-input" placeholder="80"></div><div class="fg"><label>Pulse</label><input type="number" id="ocr-pulse" class="bp-input" placeholder="72"></div></div>
+      <div class="btn-group"><button class="btn btn-primary" onclick="importOcr()">These Look Right &mdash; Import Them</button><button class="btn btn-sec" onclick="resetOcr()">Try a Different Photo</button></div>
     </div>
   </div>
 </div>
-
-<div class="built-with">
-  Built with ❤️ and <a href="https://claude.ai" target="_blank">Claude</a> ·
-  Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a> ·
-  DNS by <a href="https://cloudflare.com" target="_blank">Cloudflare</a>
 </div>
 
+<!-- ALARMS -->
+<div id="tab-alarm" style="display:none">
+<div class="card">
+  <div class="card-title">Daily Reminders</div>
+  <p style="color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:16px">Set a reminder to take your blood pressure at the same time every day. You can mute any reminder temporarily without deleting it.</p>
+  <div class="sec-label">Add a Reminder</div>
+  <div class="grid" style="margin-bottom:12px">
+    <div class="fg"><label>What time?</label><input type="time" id="al-time" value="08:00"></div>
+    <div class="fg"><label>AM or PM</label><select id="al-ampm"><option value="AM">AM (morning)</option><option value="PM">PM (afternoon)</option></select></div>
+    <div class="fg"><label>Give it a name</label><input type="text" id="al-label" placeholder="Morning reading"></div>
+    <div class="fg"><label>Which days?</label><select id="al-days"><option value="daily">Every day</option><option value="weekdays">Weekdays only</option><option value="weekends">Weekends only</option></select></div>
+  </div>
+  <button class="btn btn-primary" onclick="addAlarm()">Add This Reminder</button>
+  <div class="divider"></div>
+  <div class="sec-label">Your Reminders</div>
+  <div id="alarmList"></div>
+  <div class="tip-box" style="margin-top:12px"><strong>iPhone users:</strong> Reminders only appear while the app is open in Safari. For reliable alarms on iPhone, also set one in your Clock app.</div>
+</div>
+<div class="card">
+  <div class="card-title">Mute All Reminders</div>
+  <p style="color:var(--text2);font-size:.9rem;margin-bottom:14px;line-height:1.5">Silence all reminders at once. They will automatically turn back on when the time is up.</p>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--warm);padding:14px;border-radius:12px;border:1px solid var(--border)">
+    <div id="globalMuteStatus" class="alarm-badge ab-active">All reminders are on</div>
+    <div class="fg" style="min-width:160px"><label>Mute for how long?</label><select id="muteDuration" style="width:auto"><option value="30">30 minutes</option><option value="60">1 hour</option><option value="120">2 hours</option><option value="480">8 hours</option><option value="1440">Until tomorrow</option><option value="0">Until I turn them back on</option></select></div>
+    <button class="btn btn-sec" id="globalMuteBtn" onclick="toggleGlobalMute()">Mute All Reminders</button>
+  </div>
+</div>
+</div>
+
+<!-- REPORTS -->
+<div id="tab-report" style="display:none">
+<div class="card">
+  <div class="card-title">Create a Report</div>
+  <p style="color:var(--text2);font-size:.9rem;margin-bottom:14px;line-height:1.5">Create a report to bring to your doctor or keep for your records. Choose a date range, then download it as a PDF, spreadsheet, or text file.</p>
+  <div class="sec-label">Date Range</div>
+  <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+    <div class="fg"><label>From</label><input type="date" id="rep-from"></div>
+    <div class="fg"><label>To</label><input type="date" id="rep-to"></div>
+    <div class="fg"><label>Quick select</label><select id="rep-quick" onchange="applyQuick()" style="width:auto"><option value="">Custom range</option><option value="7">Last 7 days</option><option value="14">Last 14 days</option><option value="30">Last 30 days</option><option value="90">Last 3 months</option><option value="all">All readings</option></select></div>
+  </div>
+  <div class="fg" style="margin-bottom:12px"><label>Report Title (optional)</label><input type="text" id="rep-name" placeholder="e.g. Blood Pressure Report for Dr. Johnson"></div>
+  <div class="sec-label">What to Include</div>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px">
+    <label style="text-transform:none;display:flex;align-items:center;gap:7px;font-size:.9rem;color:var(--text2);font-weight:normal;cursor:pointer"><input type="checkbox" id="inc-stats" checked> Summary and averages</label>
+    <label style="text-transform:none;display:flex;align-items:center;gap:7px;font-size:.9rem;color:var(--text2);font-weight:normal;cursor:pointer"><input type="checkbox" id="inc-notes" checked> Notes and symptoms</label>
+    <label style="text-transform:none;display:flex;align-items:center;gap:7px;font-size:.9rem;color:var(--text2);font-weight:normal;cursor:pointer"><input type="checkbox" id="inc-meds" checked> Medication information</label>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="exportPDF()">Download PDF Report</button>
+    <button class="btn btn-sec" onclick="exportCSV()">Download Spreadsheet (CSV)</button>
+    <button class="btn btn-sec" onclick="exportTXT()">Download Text File</button>
+    <button class="btn btn-ghost" onclick="previewReport()">Preview</button>
+  </div>
+  <div id="repPreview" style="display:none"><div class="sec-label" style="margin-top:14px">Preview:</div><div class="doc-report-preview" id="repPreviewContent"></div></div>
+</div>
+</div>
+
+<!-- CLOUD -->
+<div id="tab-cloud" style="display:none">
+<div class="card">
+  <div class="card-title">Backup and Sync</div>
+  <p style="color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:16px">Your readings are always saved on this device. Use these options to keep a backup somewhere safe or to sync across multiple devices. Your health data is yours &mdash; this app never sends anything to us.</p>
+  <div class="cloud-sec">
+    <div class="cloud-title">Supabase &mdash; Free Automatic Sync <span class="badge-new">Recommended</span></div>
+    <div class="cloud-desc">Automatically saves your readings to a free cloud database. Works on all your devices at once. See the Help tab for step-by-step setup instructions.</div>
+    <div class="fg" style="margin-bottom:8px"><label>Supabase Project URL</label><input type="text" id="sbUrl" placeholder="https://abcdefgh.supabase.co"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Supabase Key (Anon / Public key)</label><input type="text" id="sbKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>
+    <div class="btn-group" style="margin-top:0"><button class="btn btn-sec btn-sm" onclick="sbTest()">Test Connection</button><button class="btn btn-primary btn-sm" onclick="saveSbConfig()">Save Settings</button></div>
+    <div id="sbStatus" class="cloud-status cs-off">Not set up yet &mdash; see Help tab for instructions</div>
+  </div>
+  <div class="cloud-sec">
+    <div class="cloud-title">Google Drive / OneDrive / Dropbox</div>
+    <div class="cloud-desc">Download all your readings as a single backup file, then upload it to any cloud storage you already use. On another device, download the file and load it here.</div>
+    <div class="btn-group" style="margin-top:0"><button class="btn btn-sec btn-sm" onclick="exportJSON()">Download My Data</button><button class="btn btn-sec btn-sm" onclick="document.getElementById('importFile').click()">Load from File</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)"></div>
+  </div>
+  <div class="tip-box"><strong>Your Privacy:</strong> My Heart Journal never collects, sells, or shares your health data. When you use Supabase, your data goes to your own Supabase account &mdash; not ours. We have no way to see your readings.</div>
+</div>
+</div>
+
+<!-- HELP -->
+<div id="tab-help" style="display:none">
+<div class="card">
+  <div class="card-title">Help and Instructions</div>
+  <div class="help-section">
+    <h3>How to Take and Record Your Blood Pressure</h3>
+    <div class="help-step"><div class="help-num">1</div><div class="help-text">Sit quietly for <strong>5 minutes</strong> before taking your reading. Sit with your feet flat on the floor and your arm resting on a table at heart level.</div></div>
+    <div class="help-step"><div class="help-num">2</div><div class="help-text">Take your reading with your blood pressure monitor. Write down the two numbers &mdash; the top number (systolic) and the bottom number (diastolic).</div></div>
+    <div class="help-step"><div class="help-num">3</div><div class="help-text">Tap <strong>Add Reading</strong> at the top of this app and enter your numbers. Tap <strong>Save This Reading</strong> when done.</div></div>
+    <div class="help-step"><div class="help-num">4</div><div class="help-text">The app will show you right away whether your reading is normal, high, or low, and what it means.</div></div>
+  </div>
+  <div class="help-section">
+    <h3>Setting Up Supabase (Free Cloud Sync)</h3>
+    <div class="tip-box"><strong>What is Supabase?</strong> It is a free, secure online storage service. Once set up, your readings automatically appear on all your devices &mdash; phone, tablet, computer &mdash; without you doing anything extra.</div>
+    <div class="help-step"><div class="help-num">1</div><div class="help-text">Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and tap <strong>Start your project</strong>. Sign up with your email address. It is completely free &mdash; no credit card needed.</div></div>
+    <div class="help-step"><div class="help-num">2</div><div class="help-text">Once logged in, tap <strong>New Project</strong>. Give it a name like &ldquo;Heart Journal&rdquo;. Choose a region close to where you live. Create a password (write it down somewhere safe). Click <strong>Create new project</strong>.</div></div>
+    <div class="help-step"><div class="help-num">3</div><div class="help-text">Wait about 1 minute for your project to be created. Then in the left sidebar, click the <strong>Settings</strong> gear icon, then click <strong>API</strong>.</div></div>
+    <div class="help-step"><div class="help-num">4</div><div class="help-text">You will see two things you need: the <strong>Project URL</strong> (looks like https://abcdefgh.supabase.co) and the <strong>anon public key</strong> (a very long string of letters starting with &ldquo;eyJ&rdquo;).</div></div>
+    <div class="help-step"><div class="help-num">5</div><div class="help-text">In the left sidebar, click <strong>Table Editor</strong>, then <strong>New Table</strong>. Name the table exactly: <code>readings</code>. Add a column named <code>data</code> (type: text) and a column named <code>updated_at</code> (type: text). Save the table.</div></div>
+    <div class="help-step"><div class="help-num">6</div><div class="help-text">Come back to this app, tap the <strong>Backup</strong> tab, paste your Project URL and your anon key into the boxes, and tap <strong>Save Settings</strong>. Then tap <strong>Test Connection</strong> &mdash; it should say &ldquo;Connected!&rdquo;</div></div>
+    <div class="tip-box">If you get stuck at any step, ask a family member, a friend, or the staff at your doctor&rsquo;s office for help. You can also take a screenshot of what you see and show it to someone.</div>
+  </div>
+  <div class="help-section">
+    <h3>Creating a Report for Your Doctor</h3>
+    <div class="help-step"><div class="help-num">1</div><div class="help-text">Tap the <strong>Reports</strong> tab at the top.</div></div>
+    <div class="help-step"><div class="help-num">2</div><div class="help-text">Tap <strong>Last 30 days</strong> from the Quick select menu, or choose your own date range.</div></div>
+    <div class="help-step"><div class="help-num">3</div><div class="help-text">Tap <strong>Download PDF Report</strong>. The file will download to your phone. You can then email it to your doctor, print it, or show it on your screen at your appointment.</div></div>
+  </div>
+  <div class="help-section">
+    <h3>When to Seek Emergency Care</h3>
+    <div class="tip-box" style="border-color:var(--crisis)"><strong style="color:var(--crisis)">Call 911 or go to the emergency room immediately if your top number is 180 or higher, OR your bottom number is 120 or higher.</strong> This is called a hypertensive crisis. Get emergency care right away, even if you feel okay.</div>
+    <p style="margin-top:10px;font-size:.9rem;color:var(--text2);line-height:1.6">Also contact your doctor soon if your readings are consistently above 140/90, or if you experience sudden severe headache, vision changes, chest pain, or difficulty breathing.</p>
+  </div>
+  <div class="help-section">
+    <h3>Common Questions</h3>
+    <div style="margin-bottom:12px"><div style="font-weight:700;color:var(--text);margin-bottom:4px">Is my information private?</div><div style="font-size:.9rem;color:var(--text2);line-height:1.5">Yes. This app never sends your information to us. Your readings stay on your device, and if you set up Supabase or Google Drive, they go to your own account that only you can access.</div></div>
+    <div style="margin-bottom:12px"><div style="font-weight:700;color:var(--text);margin-bottom:4px">Can I use this on my phone and computer at the same time?</div><div style="font-size:.9rem;color:var(--text2);line-height:1.5">Yes, if you set up Supabase. Otherwise your readings are separate on each device. You can transfer them by downloading a backup on one device and loading it on another.</div></div>
+    <div style="margin-bottom:12px"><div style="font-weight:700;color:var(--text);margin-bottom:4px">How do I install this as an app on my phone?</div><div style="font-size:.9rem;color:var(--text2);line-height:1.5"><strong>iPhone:</strong> Open in Safari &rarr; tap the Share button &rarr; tap &ldquo;Add to Home Screen.&rdquo;<br><strong>Android:</strong> Open in Chrome &rarr; tap the three-dot menu &rarr; tap &ldquo;Add to Home Screen.&rdquo;</div></div>
+    <div style="margin-bottom:12px"><div style="font-weight:700;color:var(--text);margin-bottom:4px">Is this app free?</div><div style="font-size:.9rem;color:var(--text2);line-height:1.5">Yes, completely free. No ads. No subscription. No hidden costs. Your data is yours.</div></div>
+  </div>
+</div>
+</div>
+
+<!-- SETTINGS -->
+<div id="tab-settings" style="display:none">
+<div class="card">
+  <div class="card-title">Display and Appearance</div>
+  <div class="mode-toggle" onclick="toggleSimpleMode()"><div><div class="toggle-label">Simple Mode</div><div class="toggle-sub">Show only the essentials &mdash; Add Reading, History, Reports. Recommended for most users.</div></div><div class="toggle-pill" id="simplePill"><div class="toggle-knob"></div></div></div>
+  <div class="mode-toggle" onclick="toggleLargeText()"><div><div class="toggle-label">Large Text</div><div class="toggle-sub">Makes all text bigger and easier to read.</div></div><div class="toggle-pill" id="largePill"><div class="toggle-knob"></div></div></div>
+  <div class="sec-label" style="margin-top:14px">Color Theme</div>
+  <div class="theme-grid">
+    <div class="theme-opt active" data-tid="default" onclick="setTheme('default')"><div class="swatch"><div class="sw" style="background:#fdfaf7"></div><div class="sw" style="background:#fff"></div><div class="sw" style="background:#b5294e"></div></div><div class="theme-name">Warm Light</div></div>
+    <div class="theme-opt" data-tid="dark" onclick="setTheme('dark')"><div class="swatch"><div class="sw" style="background:#1a0f14"></div><div class="sw" style="background:#22101a"></div><div class="sw" style="background:#d4365f"></div></div><div class="theme-name">Dark</div></div>
+    <div class="theme-opt" data-tid="contrast" onclick="setTheme('contrast')"><div class="swatch"><div class="sw" style="background:#000"></div><div class="sw" style="background:#111"></div><div class="sw" style="background:#ff3366"></div></div><div class="theme-name">High Contrast</div></div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-title">Your Profile</div>
+  <div class="grid">
+    <div class="fg"><label>Your Name</label><input type="text" id="p-name" placeholder="Your full name"></div>
+    <div class="fg"><label>Doctor Name</label><input type="text" id="p-doc" placeholder="Your doctor"></div>
+    <div class="fg"><label>Date of Birth</label><input type="date" id="p-dob"></div>
+    <div class="fg"><label>Default Arm</label><select id="p-arm"><option value="">No preference</option><option value="Left">Left arm</option><option value="Right">Right arm</option></select></div>
+    <div class="fg full"><label>Current Medications (shown on reports)</label><textarea id="p-meds" placeholder="e.g. Lisinopril 10mg in the morning, Amlodipine 5mg at night"></textarea></div>
+  </div>
+  <button class="btn btn-primary btn-sm" onclick="savePrefs()" style="margin-top:8px">Save Profile</button>
+</div>
+<div class="card">
+  <div class="card-title">Your Data</div>
+  <div class="btn-group"><button class="btn btn-sec" onclick="exportJSON()">Download a Backup of All My Readings</button><button class="btn btn-sec" onclick="document.getElementById('importFile').click()">Restore from a Backup File</button><button class="btn btn-danger" onclick="clearAll()">Delete All Readings</button></div>
+  <div class="help" style="margin-top:8px">Always download a backup before deleting. Deleted readings cannot be recovered.</div>
+</div>
+<div class="card">
+  <div class="card-title">Install as an App on Your Phone</div>
+  <p style="color:var(--text2);font-size:.9rem;line-height:1.7"><strong>iPhone:</strong> Open this page in Safari. Tap the Share button (the square with arrow pointing up at the bottom). Scroll down and tap <strong>Add to Home Screen</strong>. Tap Add. The app now appears on your home screen like a regular app.<br><br><strong>Android:</strong> Open this page in Chrome. Tap the three dots in the top right corner. Tap <strong>Add to Home Screen</strong> or <strong>Install App</strong>. Tap Add or Install.<br><br><strong>Windows computer:</strong> Open this page in Chrome or Edge. Look for a small install icon in the address bar. Click it and follow the prompts.</p>
+</div>
+<div class="card">
+  <div class="card-title">About This App</div>
+  <p style="color:var(--text2);font-size:.88rem;line-height:1.7"><strong>My Heart Journal</strong> is a free, private blood pressure tracker.<br>Works on any phone, tablet, or computer. No account required. No ads. No subscription.<br><br>Your health data is yours. We never collect or see your readings.<br><br><em>This app is for personal tracking only and does not replace the advice of a doctor. Always talk to your doctor about your blood pressure.</em></p>
+</div>
+</div>
+
+</div><!-- end shell -->
+
+<!-- ALARM OVERLAY -->
+<div class="alarm-overlay" id="alarmOverlay" style="display:none">
+<div class="alarm-box">
+  <div class="alarm-big-heart">&#x2764;&#xFE0F;</div>
+  <div class="alarm-title" id="alarmTitle">Time for your reading!</div>
+  <div class="alarm-msg" id="alarmMsg">Sit quietly for a moment, then take your blood pressure reading.</div>
+  <div class="btn-group" style="justify-content:center;flex-direction:column">
+    <button class="btn btn-primary btn-lg" onclick="dismissAlarm('take')">Take My Reading Now</button>
+    <button class="btn btn-sec" onclick="dismissAlarm('snooze')">Remind Me Again in 10 Minutes</button>
+    <button class="btn btn-ghost" onclick="dismissAlarm('dismiss')">Dismiss</button>
+  </div>
+</div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal" style="display:none" onclick="if(event.target===this)closeEdit()">
+<div class="modal-box">
+  <div class="modal-title">Edit This Reading <button class="modal-close" onclick="closeEdit()">&#x2715;</button></div>
+  <div id="editBody"></div>
+</div>
+</div>
+
+<div class="toast" id="toast" style="display:none"></div>
+
+<script>
+const SK='mhj_pub_r1',PK='mhj_pub_p1',TK='mhj_pub_t1',AK='mhj_pub_a1',CK='mhj_pub_c1',WK='mhj_pub_w1',SMK='mhj_pub_sm1';
+let readings=[],prefs={},alarms=[],cloudCfg={},chartInst=null,editingId=null,snoozeTimer=null,globalMuted=false,muteUntil=0,simpleMode=false;
+function load(){try{readings=JSON.parse(localStorage.getItem(SK))||[];}catch{readings=[];}try{prefs=JSON.parse(localStorage.getItem(PK))||{};}catch{prefs={};}try{alarms=JSON.parse(localStorage.getItem(AK))||[];}catch{alarms=[];}try{cloudCfg=JSON.parse(localStorage.getItem(CK))||{};}catch{cloudCfg={};}simpleMode=localStorage.getItem(SMK)==='1';}
+function saveR(){localStorage.setItem(SK,JSON.stringify(readings));updateCount();}
+function saveA(){localStorage.setItem(AK,JSON.stringify(alarms));}
+function saveC(){localStorage.setItem(CK,JSON.stringify(cloudCfg));}
+function updateCount(){document.getElementById('readingCount').textContent=readings.length+(readings.length===1?' reading':' readings');}
+let wizStep=0,wizStor='device';
+function wizNext(){if(wizStep===1){const name=document.getElementById('w-name').value.trim();if(!name){toast('Please enter your name');return;}prefs.name=name;prefs.doctor=document.getElementById('w-doc').value.trim();prefs.dob=document.getElementById('w-dob').value;localStorage.setItem(PK,JSON.stringify(prefs));}if(wizStep===2){if(wizStor==='device'){wizFinish();return;}buildStep3();}wizStep++;showWizStep(wizStep);}
+function selectStor(el){document.querySelectorAll('.stor-opt').forEach(e=>e.classList.remove('selected'));el.classList.add('selected');wizStor=el.dataset.stor;}
+function buildStep3(){const t=document.getElementById('wstep3title'),c=document.getElementById('wstep3content');if(wizStor==='supabase'){t.textContent='Set Up Supabase (Free Cloud Sync)';c.innerHTML='<div class="setup-box"><div class="setup-step"><div class="setup-num">1</div><div class="setup-text">Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and sign up for a free account.</div></div><div class="setup-step"><div class="setup-num">2</div><div class="setup-text">Click <strong>New Project</strong>. Give it a name. Click <strong>Create new project</strong>. Wait 1 minute.</div></div><div class="setup-step"><div class="setup-num">3</div><div class="setup-text">Click <strong>Settings</strong> then <strong>API</strong>. Copy your <strong>Project URL</strong> and <strong>anon public key</strong>.</div></div><div class="setup-step"><div class="setup-num">4</div><div class="setup-text">Click <strong>Table Editor</strong> then <strong>New Table</strong>. Name it <code>readings</code>. Add columns: <code>data</code> (text) and <code>updated_at</code> (text). Save.</div></div><div class="setup-step"><div class="setup-num">5</div><div class="setup-text">Paste your URL and key below, then tap Done.</div></div></div><div class="fg" style="margin-bottom:10px"><label>Your Supabase URL</label><input type="text" id="w-sburl" placeholder="https://abcdefgh.supabase.co"></div><div class="fg" style="margin-bottom:10px"><label>Your Supabase Key</label><input type="text" id="w-sbkey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>';}else{t.textContent='Google Drive Setup';c.innerHTML='<div class="setup-box"><div class="setup-step"><div class="setup-num">1</div><div class="setup-text">No special setup needed right now!</div></div><div class="setup-step"><div class="setup-num">2</div><div class="setup-text">When you want to save a backup, tap <strong>Backup</strong> tab then <strong>Download My Data</strong>.</div></div><div class="setup-step"><div class="setup-num">3</div><div class="setup-text">Upload that file to Google Drive. On another device, download it and use <strong>Load from File</strong>.</div></div></div>';}}
+function wizFinish(){if(wizStor==='supabase'){const u=document.getElementById('w-sburl'),k=document.getElementById('w-sbkey');if(u&&k&&u.value.trim()&&k.value.trim()){cloudCfg.sbUrl=u.value.trim();cloudCfg.sbKey=k.value.trim();saveC();}}localStorage.setItem(WK,'1');document.getElementById('wizard').style.display='none';document.getElementById('mainApp').style.display='';loadPrefsUI();updateCount();renderStats();const t=localStorage.getItem(TK)||'default';setTheme(t);applySimpleMode();setNow();const now=new Date();document.getElementById('rep-to').value=now.toISOString().slice(0,10);const f30=new Date();f30.setDate(f30.getDate()-30);document.getElementById('rep-from').value=f30.toISOString().slice(0,10);setInterval(checkAlarms,30000);checkAlarms();if(cloudCfg.sbUrl&&cloudCfg.sbKey)setSyncStatus('synced','Cloud connected');}
+function wizSkip(){if(localStorage.getItem(WK)==='1'){wizFinish();return;}const n=prompt('What is your name?');if(n){prefs.name=n;localStorage.setItem(PK,JSON.stringify(prefs));}localStorage.setItem(WK,'1');wizFinish();}
+function showWizStep(n){document.querySelectorAll('.wiz-step').forEach((s,i)=>s.classList.toggle('active',i===n));document.querySelectorAll('.wiz-dot').forEach((d,i)=>{d.classList.toggle('done',i<n);d.classList.toggle('current',i===n);});}
+function classify(sys,dia){sys=parseInt(sys);dia=parseInt(dia);if(isNaN(sys)||isNaN(dia))return{label:'',cls:'s-unknown',crisis:false};if(sys<90||dia<60)return{label:'Low (Hypotension)',cls:'s-low',crisis:false};if(sys<120&&dia<80)return{label:'Normal',cls:'s-normal',crisis:false};if(sys<130&&dia<80)return{label:'Elevated',cls:'s-elevated',crisis:false};if(sys<140&&dia<90)return{label:'High - Stage 1',cls:'s-stage1',crisis:false};if(sys<180&&dia<120)return{label:'High - Stage 2',cls:'s-stage2',crisis:false};return{label:'CRISIS - Get Emergency Help NOW',cls:'s-crisis',crisis:true};}
+function switchTab(id){['add','history','chart','ocr','alarm','report','cloud','help','settings'].forEach(t=>{const el=document.getElementById('tab-'+t);if(el)el.style.display=t===id?'':'none';const b=document.getElementById('tbtn-'+t);if(b)b.classList.toggle('active',t===id);});if(id==='history')renderHistory();if(id==='chart')renderChart();if(id==='alarm')renderAlarms();}
+function applySimpleMode(){const h=['ocr','alarm','cloud','help'];document.getElementById('simplePill').classList.toggle('on',simpleMode);h.forEach(t=>{const b=document.getElementById('tbtn-'+t);if(b)b.style.display=simpleMode?'none':'';});}
+function toggleSimpleMode(){simpleMode=!simpleMode;localStorage.setItem(SMK,simpleMode?'1':'0');applySimpleMode();toast(simpleMode?'Simple mode on':'All features visible');}
+function toggleLargeText(){const on=document.documentElement.getAttribute('data-theme')==='large';if(on){setTheme(localStorage.getItem(TK)||'default');}else{document.documentElement.setAttribute('data-theme','large');localStorage.setItem(TK,'large');}document.getElementById('largePill').classList.toggle('on',!on);}
+function setNow(){const n=new Date();document.getElementById('f-date').value=n.toISOString().slice(0,10);const h=n.getHours(),m=String(n.getMinutes()).padStart(2,'0');document.getElementById('f-time').value=String(h%12||12).padStart(2,'0')+':'+m;document.getElementById('f-ampm').value=h<12?'AM':'PM';}
+function clearForm(){['f-date','f-time','f-sys','f-dia','f-pulse','f-notes','f-medname'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['f-ampm','f-arm','f-pos','f-feel','f-activity','f-medtaken'].forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0;});editingId=null;liveStatus();}
+function liveStatus(){const sys=document.getElementById('f-sys').value,dia=document.getElementById('f-dia').value,el=document.getElementById('liveBadge'),cb=document.getElementById('crisisBanner'),c=classify(sys,dia);el.className='bp-badge '+c.cls;if(sys&&dia){el.textContent=sys+'/'+dia+' \u2014 '+c.label;cb.classList.toggle('show',c.crisis);}else{el.textContent='Enter your numbers above and we will tell you what they mean';cb.classList.remove('show');}}
+function saveReading(){const sys=document.getElementById('f-sys').value.trim(),dia=document.getElementById('f-dia').value.trim(),date=document.getElementById('f-date').value;if(!sys||!dia){toast('Please enter your top and bottom numbers');return;}if(!date){toast('Please enter the date');return;}const c=classify(sys,dia);const entry={id:editingId||Date.now().toString(),date,time:document.getElementById('f-time').value,ampm:document.getElementById('f-ampm').value,sys:parseInt(sys),dia:parseInt(dia),pulse:parseInt(document.getElementById('f-pulse').value)||null,arm:document.getElementById('f-arm').value,pos:document.getElementById('f-pos').value,feel:document.getElementById('f-feel').value,activity:document.getElementById('f-activity').value,medtaken:document.getElementById('f-medtaken').value,medname:document.getElementById('f-medname').value.trim(),notes:document.getElementById('f-notes').value.trim(),status:c.label,cls:c.cls,savedAt:new Date().toISOString()};if(editingId){const i=readings.findIndex(r=>r.id===editingId);if(i>=0)readings[i]=entry;editingId=null;closeEdit();toast('Reading updated!');}else{readings.push(entry);clearForm();toast('Reading saved! Great job.');}readings.sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));saveR();autoSync();}
+function renderHistory(){const search=(document.getElementById('hSearch').value||'').toLowerCase(),filter=document.getElementById('hFilter').value,sortDir=document.getElementById('hSort').value;let list=[...readings];if(filter!=='all')list=list.filter(r=>r.status&&r.status.includes(filter));if(search)list=list.filter(r=>(r.date+r.notes+r.sys+r.dia+r.arm+r.medname).toLowerCase().includes(search));if(sortDir==='asc')list.reverse();renderStats(list);const el=document.getElementById('readingsList');if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">No readings yet!</div><div>Tap Add Reading to record your first one.</div></div>';return;}const dc={'s-normal':'#2d7a4f','s-elevated':'#b07800','s-stage1':'#c05a00','s-stage2':'#b5294e','s-crisis':'#6b1fa8','s-low':'#1a5fa8','s-unknown':'#aaa'};el.innerHTML=list.map(r=>{const c=classify(r.sys,r.dia),dot=dc[r.cls]||'#aaa',ts=r.time?(r.time+' '+(r.ampm||'')):'',det=[r.arm?r.arm+' arm':null,r.pos,r.activity].filter(Boolean).join(' \u00b7 ');return '<div class="r-card" onclick="openEdit(\''+r.id+'\')">'+'<div class="r-dot" style="background:'+dot+'"></div><div><div class="r-bp">'+r.sys+'/'+r.dia+'</div><div style="font-size:.78rem;margin-top:2px"><span class="bp-badge '+r.cls+'" style="padding:2px 9px;font-size:.72rem">'+r.status+'</span>'+(r.pulse?' &nbsp;'+r.pulse+' bpm':'')+'</div></div><div class="r-info"><div class="r-date">'+fmtDate(r.date)+'</div><div class="r-detail">'+ts+(det?' \u00b7 '+det:'')+'</div></div><div class="r-note">'+(r.notes?r.notes.slice(0,70)+(r.notes.length>70?'\u2026':''):'')+'</div><div class="r-actions" onclick="event.stopPropagation()"><button class="btn btn-sec btn-sm btn-icon" onclick="openEdit(\''+r.id+'\')">Edit</button><button class="btn btn-danger btn-sm btn-icon" onclick="delReading(\''+r.id+'\')">Del</button></div></div>';}).join('');}
+function renderStats(list){const el=document.getElementById('statsRow');if(!el)return;const data=list||readings;if(!data.length){el.innerHTML='';return;}const aS=Math.round(data.reduce((a,r)=>a+r.sys,0)/data.length),aD=Math.round(data.reduce((a,r)=>a+r.dia,0)/data.length),ps=data.filter(r=>r.pulse),aP=ps.length?Math.round(ps.reduce((a,r)=>a+r.pulse,0)/ps.length):'--';el.innerHTML='<div class="stat-box"><div class="stat-val">'+aS+'/'+aD+'</div><div class="stat-lbl">Average BP</div></div><div class="stat-box"><div class="stat-val" style="color:var(--stage2)">'+Math.max(...data.map(r=>r.sys))+'</div><div class="stat-lbl">Highest</div></div><div class="stat-box"><div class="stat-val" style="color:var(--normal)">'+Math.min(...data.map(r=>r.sys))+'</div><div class="stat-lbl">Lowest</div></div><div class="stat-box"><div class="stat-val">'+aP+'</div><div class="stat-lbl">Avg Pulse</div></div><div class="stat-box"><div class="stat-val">'+data.length+'</div><div class="stat-lbl">Readings</div></div>';}
+function delReading(id){if(!confirm('Delete this reading? This cannot be undone.'))return;readings=readings.filter(r=>r.id!==id);saveR();renderHistory();toast('Reading deleted');}
+function fmtDate(d){if(!d)return'';const[y,m,day]=d.split('-');return['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m)-1]+' '+parseInt(day)+', '+y;}
+function fmtDateShort(d){if(!d)return'';const[y,m,day]=d.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+parseInt(day);}
+function openEdit(id){const r=readings.find(x=>x.id===id);if(!r)return;editingId=id;['date','time','sys','dia','pulse','notes','medname'].forEach(f=>{const e=document.getElementById('f-'+f);if(e)e.value=r[f]||'';});['ampm','arm','pos','feel','activity','medtaken'].forEach(f=>{const e=document.getElementById('f-'+f);if(e&&r[f])e.value=r[f];});liveStatus();document.getElementById('editBody').innerHTML='<p style="color:var(--text2);font-size:.9rem;margin-bottom:16px;line-height:1.5">The Add Reading form has been filled with this reading. Close this window, go to the <strong>Add Reading</strong> tab, make your changes, then tap <strong>Save This Reading</strong>.</p><div class="btn-group"><button class="btn btn-primary" onclick="closeEdit();switchTab(\'add\')">Go Edit This Reading</button><button class="btn btn-sec" onclick="closeEdit();editingId=null">Cancel</button></div>';document.getElementById('editModal').style.display='flex';}
+function closeEdit(){document.getElementById('editModal').style.display='none';}
+function renderChart(){const rv=document.getElementById('chartRange').value;let data=[...readings].reverse();if(rv!=='all')data=data.slice(-parseInt(rv));const labels=data.map(r=>fmtDateShort(r.date)+(r.time?' '+r.time:''));const sD=data.map(r=>r.sys),dD=data.map(r=>r.dia),pD=data.map(r=>r.pulse||null);const ctx=document.getElementById('bpChart');if(chartInst)chartInst.destroy();const isDark=['dark','contrast'].includes(document.documentElement.getAttribute('data-theme'));const gc=isDark?'rgba(255,255,255,.06)':'rgba(0,0,0,.05)';const tc=getComputedStyle(document.documentElement).getPropertyValue('--text2').trim()||'#666';chartInst=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Top number (Systolic)',data:sD,borderColor:'#b5294e',backgroundColor:'rgba(181,41,78,.1)',fill:true,tension:.4,pointRadius:4,pointHoverRadius:7,borderWidth:2.5},{label:'Bottom number (Diastolic)',data:dD,borderColor:'#1a5fa8',backgroundColor:'rgba(26,95,168,.08)',fill:true,tension:.4,pointRadius:4,pointHoverRadius:7,borderWidth:2.5},{label:'Pulse',data:pD,borderColor:'#2d7a4f',fill:false,tension:.4,pointRadius:3,pointHoverRadius:6,borderWidth:1.5,borderDash:[5,4]}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:tc,font:{size:11}}},tooltip:{callbacks:{afterBody(items){const c=classify(sD[items[0].dataIndex],dD[items[0].dataIndex]);return[c.label];}}}},scales:{x:{ticks:{color:tc,maxRotation:40,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc},grid:{color:gc},min:40}}}});}
+function handleDrop(e){e.preventDefault();document.getElementById('ocrDrop').classList.remove('over');const f=e.dataTransfer.files[0];if(f)handleOcrFile(f);}
+function handleOcrFile(file){if(!file||!file.type.startsWith('image/')){toast('Please choose an image file');return;}document.getElementById('ocrImg').src=URL.createObjectURL(file);document.getElementById('ocrContent').style.display='';document.getElementById('ocrLoading').style.display='';document.getElementById('ocrResult').style.display='none';document.getElementById('ocrDrop').style.display='none';Tesseract.recognize(file,'eng',{logger:m=>{if(m.status==='recognizing text'){document.getElementById('ocrProg').style.width=Math.round(m.progress*100)+'%';document.getElementById('ocrLoadTxt').textContent='Reading your photo... '+Math.round(m.progress*100)+'%';}}}).then(({data:{text}})=>{document.getElementById('ocrLoading').style.display='none';document.getElementById('ocrResult').style.display='';document.getElementById('ocrRaw').textContent=text;parseOcr(text);}).catch(e=>{document.getElementById('ocrLoading').style.display='none';toast('Could not read the photo: '+e.message);});}
+function parseOcr(text){const bpM=text.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);if(bpM){document.getElementById('ocr-sys').value=bpM[1];document.getElementById('ocr-dia').value=bpM[2];}const pps=[/pulse[:\s]+(\d{2,3})/i,/\bHR[:\s]+(\d{2,3})\b/i,/(\d{2,3})\s*bpm/i];for(const p of pps){const m=text.match(p);if(m){document.getElementById('ocr-pulse').value=m[1];break;}}}
+function importOcr(){const sys=document.getElementById('ocr-sys').value,dia=document.getElementById('ocr-dia').value;if(!sys||!dia){toast('Please make sure the top and bottom numbers are filled in');return;}document.getElementById('f-sys').value=sys;document.getElementById('f-dia').value=dia;document.getElementById('f-pulse').value=document.getElementById('ocr-pulse').value||'';setNow();liveStatus();switchTab('add');toast('Numbers imported! Please review and save.');}
+function resetOcr(){document.getElementById('ocrDrop').style.display='';document.getElementById('ocrContent').style.display='none';document.getElementById('ocrFile').value='';document.getElementById('ocrProg').style.width='0%';}
+function addAlarm(){const time=document.getElementById('al-time').value,ampm=document.getElementById('al-ampm').value,label=document.getElementById('al-label').value.trim()||'Blood pressure reminder',days=document.getElementById('al-days').value;if(!time){toast('Please choose a time');return;}alarms.push({id:Date.now().toString(),time,ampm,label,days,active:true,muted:false});saveA();renderAlarms();toast('Reminder added!');requestNotifPerm();}
+function renderAlarms(){const el=document.getElementById('alarmList');if(!alarms.length){el.innerHTML='<div class="empty" style="padding:20px">No reminders yet. Add one above!</div>';return;}const dl={daily:'Every day',weekdays:'Weekdays only',weekends:'Weekends only'};el.innerHTML=alarms.map(a=>'<div class="alarm-card"><div class="alarm-time">'+a.time+' '+a.ampm+'</div><div class="alarm-lbl"><div style="font-weight:700">'+a.label+'</div><div style="font-size:.78rem;color:var(--text3);margin-top:2px">'+(dl[a.days]||a.days)+'</div></div><div class="alarm-badge '+(a.muted?'ab-muted':a.active?'ab-active':'ab-off')+'">'+(a.muted?'Muted':a.active?'On':'Off')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sec btn-sm" onclick="toggleMute(\''+a.id+'\')">'+(a.muted?'Unmute':'Mute')+'</button><button class="btn btn-sec btn-sm" onclick="toggleAlarm(\''+a.id+'\')">'+(a.active?'Turn Off':'Turn On')+'</button><button class="btn btn-danger btn-sm" onclick="delAlarm(\''+a.id+'\')">Delete</button></div></div>').join('');updateGlobalMuteUI();}
+function toggleMute(id){const a=alarms.find(x=>x.id===id);if(!a)return;a.muted=!a.muted;saveA();renderAlarms();toast(a.muted?'Reminder muted':'Reminder turned back on');}
+function toggleAlarm(id){const a=alarms.find(x=>x.id===id);if(!a)return;a.active=!a.active;saveA();renderAlarms();toast(a.active?'Reminder turned on':'Reminder turned off');}
+function delAlarm(id){if(!confirm('Delete this reminder?'))return;alarms=alarms.filter(x=>x.id!==id);saveA();renderAlarms();}
+function toggleGlobalMute(){globalMuted=!globalMuted;if(globalMuted){const mins=parseInt(document.getElementById('muteDuration').value);muteUntil=mins>0?Date.now()+mins*60000:Infinity;toast('All reminders muted'+(mins>0?' - will turn back on automatically':''));}else{muteUntil=0;toast('Reminders are back on');}updateGlobalMuteUI();}
+function updateGlobalMuteUI(){const s=document.getElementById('globalMuteStatus'),b=document.getElementById('globalMuteBtn');if(!s||!b)return;const isMuted=globalMuted&&(muteUntil===Infinity||Date.now()<muteUntil);if(!isMuted&&globalMuted){globalMuted=false;muteUntil=0;}s.className='alarm-badge '+(isMuted?'ab-muted':'ab-active');s.textContent=isMuted?'All reminders are muted':'All reminders are on';b.textContent=isMuted?'Turn Reminders Back On':'Mute All Reminders';}
+function checkAlarms(){updateGlobalMuteUI();if(globalMuted&&(muteUntil===Infinity||Date.now()<muteUntil))return;const now=new Date(),dow=now.getDay(),curH=now.getHours(),curM=now.getMinutes();alarms.forEach(a=>{if(!a.active||a.muted)return;if(a.days==='weekdays'&&(dow===0||dow===6))return;if(a.days==='weekends'&&dow>=1&&dow<=5)return;let[h,m]=a.time.split(':').map(Number);if(a.ampm==='PM'&&h<12)h+=12;if(a.ampm==='AM'&&h===12)h=0;if(h===curH&&m===curM)fireAlarm(a);});}
+let lastFired='';
+function fireAlarm(a){const key=a.id+'-'+new Date().toISOString().slice(0,16);if(lastFired===key)return;lastFired=key;document.getElementById('alarmTitle').textContent=a.label;document.getElementById('alarmMsg').textContent='It is time to take your blood pressure reading. Sit quietly for a moment first.';document.getElementById('alarmOverlay').style.display='flex';playChime();sendNotif(a.label,'Time to take your blood pressure reading.');}
+function dismissAlarm(action){document.getElementById('alarmOverlay').style.display='none';if(action==='take'){switchTab('add');setNow();toast('Let\'s take your reading!');}if(action==='snooze'){clearTimeout(snoozeTimer);snoozeTimer=setTimeout(()=>{document.getElementById('alarmOverlay').style.display='flex';playChime();},10*60*1000);toast('I will remind you again in 10 minutes');}}
+function playChime(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[[523.25,0],[659.25,.18],[783.99,.36]].forEach(([f,t])=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0,ctx.currentTime+t);g.gain.linearRampToValueAtTime(.22,ctx.currentTime+t+.05);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+.55);o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+.6);});}catch(e){}}
+function requestNotifPerm(){if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();}
+function sendNotif(title,body){if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body});}
+function getRepR(){const from=document.getElementById('rep-from').value,to=document.getElementById('rep-to').value;return readings.filter(r=>(!from||r.date>=from)&&(!to||r.date<=to));}
+function applyQuick(){const v=document.getElementById('rep-quick').value,to=new Date().toISOString().slice(0,10);if(!v||v==='all'){document.getElementById('rep-from').value='';document.getElementById('rep-to').value='';return;}const f=new Date();f.setDate(f.getDate()-parseInt(v));document.getElementById('rep-from').value=f.toISOString().slice(0,10);document.getElementById('rep-to').value=to;}
+function buildTxt(list){const n=document.getElementById('rep-name').value||'Blood Pressure Report',iS=document.getElementById('inc-stats').checked,iN=document.getElementById('inc-notes').checked,iM=document.getElementById('inc-meds').checked;let o='=====================================\n     MY HEART JOURNAL\n     '+n+'\n=====================================\n';o+='Patient:   '+(prefs.name||'Patient')+'\n';if(prefs.doctor)o+='Doctor:    '+prefs.doctor+'\n';o+='Generated: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'\n-------------------------------------\n\n';if(iS&&list.length){const aS=Math.round(list.reduce((a,r)=>a+r.sys,0)/list.length),aD=Math.round(list.reduce((a,r)=>a+r.dia,0)/list.length),c=classify(aS,aD);o+='SUMMARY ('+list.length+' readings)\n  Average BP: '+aS+'/'+aD+' - '+c.label+'\n  Highest top number: '+Math.max(...list.map(r=>r.sys))+'\n  Lowest top number: '+Math.min(...list.map(r=>r.sys))+'\n\n';}if(iM&&prefs.meds)o+='MEDICATIONS\n  '+prefs.meds+'\n\n';o+='READINGS\n-------------------------------------\n';list.forEach(r=>{o+=fmtDate(r.date)+(r.time?' at '+r.time+' '+(r.ampm||''):'')+'\n  Blood Pressure: '+r.sys+'/'+r.dia+' - '+r.status+'\n';if(r.pulse)o+='  Pulse: '+r.pulse+' bpm\n';if(r.arm)o+='  Arm: '+r.arm+'\n';if(iM&&r.medtaken)o+='  Medication: '+r.medtaken+(r.medname?' ('+r.medname+')':'')+'\n';if(iN&&r.notes)o+='  Notes: '+r.notes+'\n';o+='\n';});return o;}
+function previewReport(){const list=getRepR();document.getElementById('repPreviewContent').textContent=buildTxt(list);document.getElementById('repPreview').style.display='';}
+function exportTXT(){const list=getRepR();if(!list.length){toast('No readings in that date range');return;}dl(buildTxt(list),'my-heart-journal-report.txt','text/plain');toast('Text file downloaded!');}
+function exportCSV(){const list=getRepR();if(!list.length){toast('No readings in that date range');return;}const h=['Date','Time','AM/PM','Top Number','Bottom Number','Pulse','Category','Arm','Position','Activity','Feeling','Medication Taken','Medication Name','Notes'];const rows=list.map(r=>[r.date,r.time,r.ampm,r.sys,r.dia,r.pulse||'',r.status,r.arm,r.pos,r.activity,r.feel,r.medtaken,r.medname,(r.notes||'').replace(/,/g,';').replace(/\n/g,' ')]);dl([h,...rows].map(row=>row.map(v=>'"'+(v||'')+'"').join(',')).join('\n'),'my-heart-journal-report.csv','text/csv');toast('Spreadsheet downloaded!');}
+function exportPDF(){const list=getRepR();if(!list.length){toast('No readings in that date range');return;}const{jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'letter'});const lm=18,pw=175,lh=6.5;let y=28;function line(text,sz,bold,col){doc.setFontSize(sz||11);doc.setFont('helvetica',bold?'bold':'normal');if(col)doc.setTextColor(...col);else doc.setTextColor(44,26,34);const lines=doc.splitTextToSize(text,pw);lines.forEach(l=>{doc.text(l,lm,y);y+=lh;if(y>262){doc.addPage();y=22;}});}function hr(){doc.setDrawColor(200,180,188);doc.line(lm,y,lm+pw,y);y+=4;}doc.setFillColor(181,41,78);doc.rect(0,0,216,22,'F');doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text('My Heart Journal',lm,13);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(document.getElementById('rep-name').value||'Blood Pressure Report',lm,20);doc.setTextColor(44,26,34);line('Patient: '+(prefs.name||'Patient'),10.5);if(prefs.doctor)line('Doctor: '+prefs.doctor,10.5);if(prefs.meds&&document.getElementById('inc-meds').checked)line('Medications: '+prefs.meds,9.5,false,[90,70,80]);line('Generated: '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}),9,false,[130,100,110]);y+=1;hr();if(document.getElementById('inc-stats').checked&&list.length){const aS=Math.round(list.reduce((a,r)=>a+r.sys,0)/list.length),aD=Math.round(list.reduce((a,r)=>a+r.dia,0)/list.length),c=classify(aS,aD);line('Summary - '+list.length+' readings',11,true,[100,70,80]);line('Average blood pressure: '+aS+'/'+aD+' ('+c.label+')',10.5);line('Highest top number: '+Math.max(...list.map(r=>r.sys))+'   Lowest top number: '+Math.min(...list.map(r=>r.sys)),10);y+=1;hr();}line('Individual Readings',11,true,[100,70,80]);const cm={'s-normal':[30,100,60],'s-elevated':[140,100,0],'s-stage1':[160,80,0],'s-stage2':[150,30,60],'s-crisis':[100,25,140],'s-low':[20,80,150]};list.forEach(r=>{if(y>248){doc.addPage();y=22;}doc.setFillColor(250,245,247);doc.rect(lm-2,y-4,pw+4,document.getElementById('inc-notes').checked&&r.notes?30:22,'F');line(fmtDate(r.date)+(r.time?' at '+r.time+' '+(r.ampm||''):''),10.5,true);const cc=cm[r.cls]||[80,60,70];doc.setTextColor(...cc);doc.setFontSize(10.5);doc.setFont('helvetica','bold');doc.text(r.sys+'/'+r.dia+' - '+r.status,lm+4,y);y+=lh;doc.setTextColor(80,60,70);doc.setFontSize(9.5);doc.setFont('helvetica','normal');const meta=[r.pulse?'Pulse: '+r.pulse+' bpm':null,r.arm?r.arm+' arm':null,r.pos,r.activity].filter(Boolean).join('   |   ');if(meta){doc.text(meta,lm+4,y);y+=lh;}if(document.getElementById('inc-meds').checked&&r.medtaken){doc.text('Medication: '+r.medtaken+(r.medname?' ('+r.medname+')':''),lm+4,y);y+=lh;}if(document.getElementById('inc-notes').checked&&r.notes){const ns=doc.splitTextToSize('Notes: '+r.notes.slice(0,130),pw-8);ns.forEach(l=>{doc.text(l,lm+4,y);y+=lh;});}y+=3;});doc.setFontSize(8);doc.setTextColor(150,120,130);doc.setFont('helvetica','italic');doc.text('Generated by My Heart Journal. For personal tracking only. Not a substitute for medical advice.',lm,270);doc.save('my-heart-journal-report.pdf');toast('PDF downloaded!');}
+function saveSbConfig(){cloudCfg.sbUrl=document.getElementById('sbUrl').value.trim();cloudCfg.sbKey=document.getElementById('sbKey').value.trim();saveC();toast('Settings saved');}
+async function sbTest(){const url=cloudCfg.sbUrl,key=cloudCfg.sbKey;if(!url||!key){toast('Please enter your Supabase URL and key first');return;}setSyncStatus('syncing','Testing...');try{const r=await fetch(url+'/rest/v1/',{headers:{'apikey':key,'Authorization':'Bearer '+key},signal:AbortSignal.timeout(7000)});if(r.ok||r.status===404){document.getElementById('sbStatus').className='cloud-status cs-ok';document.getElementById('sbStatus').textContent='Connected! Your readings will sync automatically.';setSyncStatus('synced','Cloud connected');}else throw new Error('HTTP '+r.status);}catch(e){document.getElementById('sbStatus').className='cloud-status cs-err';document.getElementById('sbStatus').textContent='Could not connect: '+e.message+'. See Help tab for setup instructions.';setSyncStatus('error','Not connected');}}
+async function sbSync(){const url=cloudCfg.sbUrl,key=cloudCfg.sbKey;if(!url||!key)return;setSyncStatus('syncing','Saving...');try{const r=await fetch(url+'/rest/v1/readings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(readings.map(x=>({id:x.id,data:JSON.stringify(x),updated_at:x.savedAt||new Date().toISOString()}))),signal:AbortSignal.timeout(12000)});if(r.ok||r.status===201){setSyncStatus('synced','Saved to cloud');}else throw new Error('HTTP '+r.status);}catch(e){setSyncStatus('error','Sync failed');}}
+function setSyncStatus(state,label){const p=document.getElementById('syncPill'),l=document.getElementById('syncLabel');p.className='sync-pill '+state;l.textContent=label;}
+async function autoSync(){if(cloudCfg.sbUrl&&cloudCfg.sbKey){try{await sbSync();}catch{}}}
+function exportJSON(){dl(JSON.stringify({readings,prefs,exportedAt:new Date().toISOString(),version:'pub1'},[],2),'my-heart-journal-backup.json','application/json');toast('Backup file downloaded! Save it somewhere safe.');}
+function importJSON(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.readings)throw new Error('Invalid');if(!confirm('This will replace your '+readings.length+' current readings with '+d.readings.length+' from the backup file. Continue?'))return;readings=d.readings;if(d.prefs)prefs=d.prefs;saveR();loadPrefsUI();toast('Restored! '+readings.length+' readings loaded.');}catch{toast('Sorry, that file could not be read.');}};reader.readAsText(file);input.value='';}
+function dl(content,filename,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=filename;a.click();}
+function setTheme(t){const root=document.documentElement;if(t==='default')root.removeAttribute('data-theme');else root.setAttribute('data-theme',t);localStorage.setItem(TK,t);document.querySelectorAll('.theme-opt').forEach(el=>el.classList.toggle('active',el.dataset.tid===t));if(chartInst)setTimeout(renderChart,100);}
+function savePrefs(){prefs.name=document.getElementById('p-name').value;prefs.doctor=document.getElementById('p-doc').value;prefs.dob=document.getElementById('p-dob').value;prefs.arm=document.getElementById('p-arm').value;prefs.meds=document.getElementById('p-meds').value;localStorage.setItem(PK,JSON.stringify(prefs));toast('Profile saved!');}
+function loadPrefsUI(){if(prefs.name)document.getElementById('p-name').value=prefs.name;if(prefs.doctor)document.getElementById('p-doc').value=prefs.doctor;if(prefs.dob)document.getElementById('p-dob').value=prefs.dob;if(prefs.arm){document.getElementById('p-arm').value=prefs.arm;const fa=document.getElementById('f-arm');if(fa)fa.value=prefs.arm;}if(prefs.meds)document.getElementById('p-meds').value=prefs.meds;if(cloudCfg.sbUrl)document.getElementById('sbUrl').value=cloudCfg.sbUrl;if(cloudCfg.sbKey)document.getElementById('sbKey').value=cloudCfg.sbKey;}
+function clearAll(){if(!confirm('This will permanently delete ALL '+readings.length+' of your readings. Are you sure?'))return;readings=[];saveR();renderHistory();toast('All readings have been deleted.');}
+let toastTmr;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastTmr);toastTmr=setTimeout(()=>el.style.display='none',3800);}
+document.addEventListener('DOMContentLoaded',()=>{
+  load();
+  if(localStorage.getItem(WK)==='1'){
+    document.getElementById('wizard').style.display='none';document.getElementById('mainApp').style.display='';
+    setNow();updateCount();loadPrefsUI();renderStats();
+    const t=localStorage.getItem(TK)||'default';setTheme(t);applySimpleMode();
+    const now=new Date();document.getElementById('rep-to').value=now.toISOString().slice(0,10);
+    const f30=new Date();f30.setDate(f30.getDate()-30);document.getElementById('rep-from').value=f30.toISOString().slice(0,10);
+    setInterval(checkAlarms,30000);checkAlarms();
+    if(alarms.length)requestNotifPerm();
+    if(cloudCfg.sbUrl&&cloudCfg.sbKey)setSyncStatus('synced','Cloud connected');
+  }
+  const deviceOpt=document.querySelector('[data-stor="device"]');if(deviceOpt)deviceOpt.classList.add('selected');
+});
+</script>
 </body>
 </html>
