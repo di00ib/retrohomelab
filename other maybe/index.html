@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Retro Homelab — Free, private tools built by Don Reynolds. No tracking. No ads. Just useful apps.">
+<title>Retro Homelab</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1923;--surface:#1a2535;--border:#2d3f55;
+  --text:#e8edf3;--text2:#a8b9cc;--text3:#6b8098;
+  --accent:#b5294e;--accent2:#d4365f;
+}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Lora',serif;font-size:1.1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.nav-links{display:flex;gap:20px;}
+.nav-links a{font-size:.82rem;color:var(--text3);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--text2);}
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px 40px;text-align:center;}
+.logo{font-size:3.5rem;margin-bottom:20px;animation:pulse 3s ease infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+h1{font-family:'Lora',serif;font-size:2.6rem;font-weight:700;margin-bottom:10px;letter-spacing:-.5px;}
+.tagline{font-size:1rem;color:var(--text2);margin-bottom:56px;line-height:1.7;max-width:420px;}
+.projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px;max-width:820px;width:100%;margin-bottom:56px;}
+.project-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:26px;text-align:left;text-decoration:none;color:var(--text);transition:all .22s ease;display:block;position:relative;overflow:hidden;}
+.project-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(181,41,78,.07) 0%,transparent 60%);opacity:0;transition:opacity .22s;}
+.project-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 10px 40px rgba(181,41,78,.18);}
+.project-card:hover::before{opacity:1;}
+.project-card.placeholder{opacity:.45;cursor:default;pointer-events:none;}
+.proj-icon{font-size:2.4rem;margin-bottom:14px;}
+.proj-title{font-family:'Lora',serif;font-size:1.25rem;font-weight:700;margin-bottom:8px;color:var(--text);}
+.proj-desc{font-size:.88rem;color:var(--text2);line-height:1.6;margin-bottom:14px;}
+.proj-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.tag{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:10px;background:rgba(181,41,78,.15);color:var(--accent2);letter-spacing:.3px;}
+.proj-link{display:inline-flex;align-items:center;gap:5px;font-size:.83rem;font-weight:700;color:var(--accent2);}
+.proj-link::after{content:'→';transition:transform .2s;}
+.project-card:hover .proj-link::after{transform:translateX(3px);}
+.about-strip{max-width:820px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 26px;text-align:left;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px;}
+.about-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--accent2);margin-bottom:6px;}
+.about-text{font-size:.85rem;color:var(--text2);line-height:1.7;}
+.stack-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.stack-pill{font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text3);}
+.footer{font-size:.78rem;color:var(--text3);text-align:center;padding:20px;border-top:1px solid var(--border);}
+.footer a{color:var(--text3);text-decoration:none;}
+.footer a:hover{color:var(--text2);}
+
+/* ===== FEEDBACK WIDGET ===== */
+.fb-btn{
+  position:fixed;bottom:24px;right:24px;
+  background:linear-gradient(135deg,#b5294e,#d4365f);
+  color:#fff;border:none;border-radius:50px;
+  padding:12px 20px;font-size:.85rem;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;gap:7px;
+  box-shadow:0 4px 20px rgba(181,41,78,.45);
+  font-family:'Source Sans 3',system-ui,sans-serif;
+  transition:all .2s ease;z-index:500;
+  letter-spacing:.2px;
+}
+.fb-btn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(181,41,78,.6);}
+.fb-btn svg{width:16px;height:16px;flex-shrink:0;}
+.fb-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:1000;display:flex;align-items:center;justify-content:center;
+  padding:16px;backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .22s ease;
+}
+.fb-overlay.open{opacity:1;pointer-events:all;}
+.fb-modal{
+  background:#1a2535;border:1px solid #2d3f55;border-radius:20px;
+  padding:28px 26px;width:100%;max-width:480px;
+  box-shadow:0 16px 60px rgba(0,0,0,.5);
+  transform:translateY(16px);transition:transform .25s ease;
+  max-height:90vh;overflow-y:auto;
+}
+.fb-overlay.open .fb-modal{transform:translateY(0);}
+.fb-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.fb-modal-title{font-family:'Lora',serif;font-size:1.2rem;font-weight:700;color:#e8edf3;display:flex;align-items:center;gap:8px;}
+.fb-close{background:none;border:none;color:#6b8098;font-size:1.4rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px;transition:color .15s;}
+.fb-close:hover{color:#e8edf3;}
+.fb-subtitle{font-size:.83rem;color:#a8b9cc;margin-bottom:20px;line-height:1.5;}
+.fb-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.fb-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#6b8098;}
+.fb-label .fb-opt{font-weight:400;color:#4a6070;text-transform:none;letter-spacing:0;}
+.fb-input,.fb-select,.fb-textarea{
+  width:100%;padding:10px 13px;border:1.5px solid #2d3f55;
+  border-radius:10px;background:#0f1923;color:#e8edf3;
+  font-family:'Source Sans 3',system-ui,sans-serif;font-size:.92rem;
+  transition:border-color .18s;-webkit-appearance:none;
+}
+.fb-input:focus,.fb-select:focus,.fb-textarea:focus{
+  outline:none;border-color:#b5294e;
+  box-shadow:0 0 0 3px rgba(181,41,78,.15);
+}
+.fb-textarea{resize:vertical;min-height:90px;}
+.fb-select option{background:#1a2535;}
+.fb-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fb-submit{
+  width:100%;padding:12px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#b5294e,#d4365f);
+  color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;
+  font-family:'Source Sans 3',system-ui,sans-serif;
+  transition:all .2s;margin-top:4px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.fb-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 16px rgba(181,41,78,.4);}
+.fb-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.fb-success{
+  text-align:center;padding:24px 10px;
+  display:none;
+}
+.fb-success-icon{font-size:3rem;margin-bottom:12px;}
+.fb-success-title{font-family:'Lora',serif;font-size:1.2rem;font-weight:700;color:#e8edf3;margin-bottom:8px;}
+.fb-success-msg{font-size:.88rem;color:#a8b9cc;line-height:1.6;}
+.fb-error{
+  background:rgba(181,41,78,.12);border:1px solid rgba(181,41,78,.3);
+  border-radius:8px;padding:10px 13px;font-size:.83rem;color:#f87171;
+  margin-top:10px;display:none;line-height:1.5;
+}
+@media(max-width:480px){
+  .fb-btn{bottom:16px;right:16px;padding:11px 16px;font-size:.8rem;}
+  .fb-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">🖥️ Retro Homelab</div>
+  <div class="nav-links">
+    <a href="https://github.com/di00ib" target="_blank">GitHub ↗</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="logo">🖥️</div>
+  <h1>Retro Homelab</h1>
+  <p class="tagline">
+    Free, private tools built as a hobby.<br>
+    No tracking. No ads. No accounts required.
+  </p>
+
+  <div class="projects">
+    <a href="https://heartjournal.retrohomelab.dev" class="project-card">
+      <div class="proj-icon">❤️</div>
+      <div class="proj-title">My Heart Journal</div>
+      <div class="proj-desc">
+        A free blood pressure tracker that works on any device.
+        Record readings, scan monitor photos with your camera,
+        generate doctor-ready reports, and set daily reminders.
+      </div>
+      <div class="proj-tags">
+        <span class="tag">Free</span>
+        <span class="tag">Private</span>
+        <span class="tag">Works Offline</span>
+        <span class="tag">PWA</span>
+        <span class="tag">No Account Needed</span>
+      </div>
+      <div class="proj-link">Open App</div>
+    </a>
+    <div class="project-card placeholder">
+      <div class="proj-icon">🔧</div>
+      <div class="proj-title">More Coming Soon</div>
+      <div class="proj-desc">More free homelab tools in the works.<br>Built slow, built right.</div>
+      <div class="proj-tags"><span class="tag">Coming Soon</span></div>
+    </div>
+  </div>
+
+  <div class="about-strip">
+    <div style="flex:2;min-width:220px;">
+      <div class="about-label">About This Site</div>
+      <div class="about-text">
+        Personal projects from my home server — a FIREBAT Mini PC running Ubuntu,
+        Docker, and 20 self-hosted services. These are the public-facing pieces:
+        free tools anyone can use, built and maintained as a hobby.
+      </div>
+    </div>
+    <div style="flex:1;min-width:160px;">
+      <div class="about-label">Stack</div>
+      <div class="stack-pills">
+        <span class="stack-pill">HTML</span>
+        <span class="stack-pill">JavaScript</span>
+        <span class="stack-pill">Docker</span>
+        <span class="stack-pill">Tailscale</span>
+        <span class="stack-pill">Cloudflare</span>
+        <span class="stack-pill">GitHub Pages</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Built with ❤️ and <a href="https://claude.ai" target="_blank">Claude</a> &nbsp;·&nbsp;
+  Hosted on <a href="https://pages.github.com" target="_blank">GitHub Pages</a> &nbsp;·&nbsp;
+  DNS by <a href="https://cloudflare.com" target="_blank">Cloudflare</a>
+</div>
+
+<!-- ===== FEEDBACK BUTTON ===== -->
+<button class="fb-btn" onclick="openFeedback()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  Feedback
+</button>
+
+<!-- ===== FEEDBACK MODAL ===== -->
+<div class="fb-overlay" id="fbOverlay" onclick="if(event.target===this)closeFeedback()">
+  <div class="fb-modal">
+    <div class="fb-modal-header">
+      <div class="fb-modal-title">💬 Leave Feedback</div>
+      <button class="fb-close" onclick="closeFeedback()">✕</button>
+    </div>
+    <div class="fb-subtitle">Found a bug? Have a question or idea? I read every message.</div>
+
+    <div id="fbForm">
+      <div class="fb-field">
+        <label class="fb-label">Type of Feedback</label>
+        <select class="fb-select" id="fb-type">
+          <option value="Bug Report">🐛 Bug Report — something isn't working</option>
+          <option value="Question">❓ Question — I need help with something</option>
+          <option value="Suggestion">💡 Suggestion — I have an idea</option>
+          <option value="Other">💬 Other</option>
+        </select>
+      </div>
+      <div class="fb-row">
+        <div class="fb-field">
+          <label class="fb-label">Your Name</label>
+          <input class="fb-input" type="text" id="fb-name" placeholder="Margaret" required>
+        </div>
+        <div class="fb-field">
+          <label class="fb-label">Email</label>
+          <input class="fb-input" type="email" id="fb-email" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="fb-field">
+        <label class="fb-label">Phone <span class="fb-opt">(optional)</span></label>
+        <input class="fb-input" type="tel" id="fb-phone" placeholder="(555) 123-4567">
+      </div>
+      <div class="fb-field">
+        <label class="fb-label">Message</label>
+        <textarea class="fb-textarea" id="fb-message" placeholder="Tell me what happened or what you'd like to see..." required></textarea>
+      </div>
+      <div class="fb-error" id="fbError"></div>
+      <button class="fb-submit" id="fbSubmit" onclick="submitFeedback()">
+        <span id="fbSubmitLabel">Send Message</span>
+      </button>
+    </div>
+
+    <div class="fb-success" id="fbSuccess">
+      <div class="fb-success-icon">✅</div>
+      <div class="fb-success-title">Message sent! Thank you.</div>
+      <div class="fb-success-msg">I'll reply to your email as soon as I can.<br><br>
+        <button class="fb-submit" style="width:auto;padding:10px 22px;margin-top:10px" onclick="closeFeedback()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== FEEDBACK WIDGET =====
+// Replace YOUR_FORM_ID below with the ID you get from formspree.io
+// Example: if Formspree gives you https://formspree.io/f/abcd1234, use 'abcd1234'
+const FORMSPREE_ID = 'YOUR_FORM_ID';
+
+function openFeedback() {
+  document.getElementById('fbOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('fb-name').focus(), 300);
+}
+
+function closeFeedback() {
+  document.getElementById('fbOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeFeedback();
+});
+
+async function submitFeedback() {
+  const name    = document.getElementById('fb-name').value.trim();
+  const email   = document.getElementById('fb-email').value.trim();
+  const phone   = document.getElementById('fb-phone').value.trim();
+  const message = document.getElementById('fb-message').value.trim();
+  const type    = document.getElementById('fb-type').value;
+  const errEl   = document.getElementById('fbError');
+  const btn     = document.getElementById('fbSubmit');
+  const lbl     = document.getElementById('fbSubmitLabel');
+
+  // Validation
+  errEl.style.display = 'none';
+  if (!name)    { showFbError('Please enter your name.'); return; }
+  if (!email || !email.includes('@')) { showFbError('Please enter a valid email address.'); return; }
+  if (!message) { showFbError('Please write a message before sending.'); return; }
+
+  // Disable button and show loading
+  btn.disabled = true;
+  lbl.textContent = 'Sending…';
+
+  try {
+    const res = await fetch('https://formspree.io/f/' + FORMSPREE_ID, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        type:    type,
+        name:    name,
+        email:   email,
+        phone:   phone || 'Not provided',
+        message: message,
+        page:    'retrohomelab.dev (landing page)',
+        _replyto: email,
+        _subject: '[Retro Homelab] ' + type + ' from ' + name
+      })
+    });
+
+    if (res.ok) {
+      document.getElementById('fbForm').style.display = 'none';
+      document.getElementById('fbSuccess').style.display = 'block';
+    } else {
+      const data = await res.json();
+      showFbError(data.error || 'Something went wrong. Please try emailing donreynolds+heartjournal@gmail.com directly.');
+      btn.disabled = false;
+      lbl.textContent = 'Send Message';
+    }
+  } catch (err) {
+    showFbError('Could not send — please check your internet connection, or email donreynolds+heartjournal@gmail.com directly.');
+    btn.disabled = false;
+    lbl.textContent = 'Send Message';
+  }
+}
+
+function showFbError(msg) {
+  const el = document.getElementById('fbError');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+
+</body>
+</html>

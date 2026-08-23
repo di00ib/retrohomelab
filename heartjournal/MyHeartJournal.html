@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Heart Journal">
+<meta name="theme-color" content="#c0392b">
+<title>My Heart Journal v2</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Heart Journal">
+<meta name="theme-color" content="#c0392b">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f0f4f8;--surface:#fff;--surface2:#e8edf3;--surface3:#dde4ec;--border:#c5d0dc;--text:#1a2332;--text2:#4a5568;--text3:#718096;--accent:#c0392b;--accent2:#e74c3c;--accent-soft:#fdecea;--normal:#27ae60;--elevated:#f39c12;--stage1:#e67e22;--stage2:#c0392b;--crisis:#8e44ad;--low:#2980b9;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,.08);--shadow-lg:0 8px 32px rgba(0,0,0,.14);--font-head:'Georgia','Times New Roman',serif;--font-body:'Segoe UI',system-ui,sans-serif;--tr:.2s ease;}
+[data-theme=dark]{--bg:#0f1923;--surface:#1a2535;--surface2:#243047;--surface3:#2d3f55;--border:#2d3f55;--text:#e8edf3;--text2:#a8b9cc;--text3:#6b8098;--accent:#e74c3c;--accent2:#ff6b6b;--accent-soft:#2d1a1a;}
+[data-theme=contrast]{--bg:#000;--surface:#111;--surface2:#1a1a1a;--surface3:#222;--border:#fff;--text:#fff;--text2:#eee;--text3:#ccc;--accent:#ff4444;--accent2:#ff6666;--accent-soft:#200000;--normal:#00ff00;--elevated:#ffff00;--stage1:#ff8800;--stage2:#ff4400;--crisis:#ff00ff;--low:#00aaff;}
+[data-theme=soft]{--bg:#fef9f5;--surface:#fff;--surface2:#fdf0e8;--surface3:#f5e0cc;--border:#e8d5c4;--text:#3d2b1f;--text2:#6b4c3b;--text3:#9b7060;}
+[data-theme=large]{font-size:20px;}
+*{box-sizing:border-box;margin:0;padding:0;}html{-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--tr),color var(--tr);}
+.shell{max-width:920px;margin:0 auto;padding:14px 14px 80px;}
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 14px;border-bottom:2px solid var(--border);margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo-heart{width:48px;height:48px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 12px rgba(192,57,43,.3);flex-shrink:0;}
+.app-title{font-family:var(--font-head);font-size:1.65rem;font-weight:700;letter-spacing:-.5px;}
+.app-sub{font-size:.73rem;color:var(--text3);margin-top:1px;}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sync-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text3);transition:all var(--tr);}
+.sync-pill.synced{border-color:var(--normal);color:var(--normal);}.sync-pill.syncing{border-color:var(--elevated);color:var(--elevated);}.sync-pill.error{border-color:var(--stage2);color:var(--stage2);}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+.tab-bar{display:flex;gap:3px;background:var(--surface2);border-radius:var(--radius);padding:4px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;padding:8px 15px;border-radius:8px;border:none;background:transparent;color:var(--text2);font-size:.83rem;font-weight:500;cursor:pointer;transition:all var(--tr);white-space:nowrap;}
+.tab-btn.active{background:var(--surface);color:var(--accent);box-shadow:var(--shadow);font-weight:700;}
+.tab-btn:hover:not(.active){background:var(--surface);opacity:.75;}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px;margin-bottom:14px;}
+.card-title{font-family:var(--font-head);font-size:1.08rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.fg{display:flex;flex-direction:column;gap:4px;}.fg.full{grid-column:1/-1;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:11px;margin-bottom:11px;}
+label{font-size:.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:1rem;transition:border-color var(--tr),background var(--tr);-webkit-appearance:none;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+.bp-input{font-size:1.55rem;font-weight:700;text-align:center;padding:11px 8px;}
+textarea{resize:vertical;min-height:68px;}
+.help{font-size:.75rem;color:var(--text3);margin-top:3px;line-height:1.4;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:8px;border:none;font-size:.88rem;font-weight:600;cursor:pointer;transition:all var(--tr);white-space:nowrap;text-decoration:none;font-family:var(--font-body);}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(192,57,43,.3);}.btn-primary:hover{background:var(--accent2);transform:translateY(-1px);}
+.btn-sec{background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);}.btn-sec:hover{background:var(--surface3);color:var(--text);}
+.btn-danger{background:transparent;color:var(--stage2);border:1.5px solid var(--stage2);}.btn-danger:hover{background:var(--accent-soft);}
+.btn-sm{padding:6px 12px;font-size:.78rem;}.btn-icon{padding:7px 9px;}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.bp-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:20px;font-size:.83rem;font-weight:700;letter-spacing:.3px;margin-top:6px;}
+.s-normal{background:#d5f5e3;color:#1a7a40;}.s-elevated{background:#fef9c3;color:#7c5c00;}.s-stage1{background:#fde8cc;color:#8b3d00;}.s-stage2{background:#fce4e4;color:#8b0000;}.s-crisis{background:#f3d4ff;color:#5b0080;animation:blink 1.4s infinite;}.s-low{background:#dbeafe;color:#1e40af;}.s-unknown{background:var(--surface2);color:var(--text3);}
+[data-theme=dark] .s-normal{background:#0d3320;color:#4ade80;}[data-theme=dark] .s-elevated{background:#3d2f00;color:#fbbf24;}[data-theme=dark] .s-stage1{background:#3d1f00;color:#fb923c;}[data-theme=dark] .s-stage2{background:#3d0c0c;color:#f87171;}[data-theme=dark] .s-crisis{background:#2a0d3d;color:#d946ef;}[data-theme=dark] .s-low{background:#0d2040;color:#60a5fa;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.65;}}
+.readings-list{display:flex;flex-direction:column;gap:9px;}
+.r-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 15px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;transition:all var(--tr);}
+.r-card:hover{border-color:var(--accent);box-shadow:var(--shadow);}
+.r-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.r-bp{font-family:var(--font-head);font-size:1.45rem;font-weight:700;min-width:100px;}
+.r-pulse{font-size:.82rem;color:var(--text3);margin-top:1px;}
+.r-meta{flex:1;min-width:110px;}.r-date{font-size:.88rem;font-weight:600;color:var(--text2);}.r-detail{font-size:.75rem;color:var(--text3);margin-top:2px;}
+.r-note{flex:2;font-size:.8rem;color:var(--text2);min-width:130px;font-style:italic;}
+.r-actions{display:flex;gap:5px;margin-left:auto;}
+.stats-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.stat-box{flex:1;min-width:90px;background:var(--surface2);border-radius:10px;padding:11px;text-align:center;}
+.stat-val{font-family:var(--font-head);font-size:1.35rem;font-weight:700;}.stat-lbl{font-size:.69rem;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+.chart-wrap{position:relative;height:210px;width:100%;}
+.drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:30px;text-align:center;cursor:pointer;transition:all var(--tr);background:var(--surface2);}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:var(--accent-soft);}
+.drop-icon{font-size:2.8rem;margin-bottom:8px;}.drop-txt{color:var(--text2);font-size:.88rem;}
+.ocr-img{max-width:100%;max-height:280px;border-radius:8px;margin:10px 0;border:1.5px solid var(--border);}
+.ocr-raw{background:var(--surface2);border-radius:8px;padding:11px;font-family:monospace;font-size:.8rem;color:var(--text2);max-height:130px;overflow-y:auto;margin:7px 0;white-space:pre-wrap;border:1px solid var(--border);}
+.prog-wrap{background:var(--surface2);border-radius:20px;height:7px;overflow:hidden;margin:7px 0;}
+.prog-fill{height:100%;background:var(--accent);border-radius:20px;transition:width .3s;}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.alarm-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.alarm-time{font-family:var(--font-head);font-size:1.6rem;font-weight:700;min-width:90px;}
+.alarm-label{font-size:.88rem;color:var(--text2);flex:1;}
+.alarm-badge{font-size:.75rem;padding:3px 9px;border-radius:12px;font-weight:600;}
+.badge-active{background:#d5f5e3;color:#1a7a40;}.badge-muted{background:var(--surface3);color:var(--text3);}.badge-off{background:var(--surface3);color:var(--text3);}
+.mute-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);}
+.mute-box{background:var(--surface);border-radius:18px;padding:30px 28px;max-width:380px;width:100%;text-align:center;box-shadow:var(--shadow-lg);}
+.mute-title{font-family:var(--font-head);font-size:1.4rem;font-weight:700;margin-bottom:8px;}
+.mute-heart{font-size:3.5rem;animation:blink 1s infinite;margin-bottom:10px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(4px);}
+.modal-box{background:var(--surface);border-radius:16px;padding:22px;width:100%;max-width:550px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:var(--font-head);font-size:1.15rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--text3);padding:4px;line-height:1;}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-top:8px;}
+.theme-opt{border:2px solid var(--border);border-radius:10px;padding:11px;cursor:pointer;text-align:center;transition:all var(--tr);background:var(--surface);}
+.theme-opt:hover{border-color:var(--accent);transform:translateY(-2px);}.theme-opt.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.swatch{width:100%;height:36px;border-radius:6px;margin-bottom:7px;display:flex;overflow:hidden;}.sw{flex:1;}
+.theme-name{font-size:.8rem;font-weight:600;color:var(--text2);}
+.ref-tbl{width:100%;border-collapse:collapse;font-size:.83rem;}
+.ref-tbl th,.ref-tbl td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--border);}
+.ref-tbl th{font-weight:700;color:var(--text3);text-transform:uppercase;font-size:.7rem;letter-spacing:.5px;background:var(--surface2);}
+.ref-tbl tr:last-child td{border-bottom:none;}
+.cloud-sec{background:var(--surface2);border-radius:10px;padding:15px;margin-bottom:12px;}
+.cloud-title{font-weight:700;font-size:.88rem;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.cloud-desc{font-size:.78rem;color:var(--text3);line-height:1.5;margin-bottom:10px;}
+.cloud-status{display:flex;align-items:center;gap:7px;font-size:.78rem;padding:7px 11px;border-radius:7px;margin-top:8px;}
+.cs-ok{background:#d5f5e3;color:#1a7a40;}.cs-off{background:var(--surface3);color:var(--text3);}.cs-err{background:#fce4e4;color:#8b0000;}
+.divider{height:1px;background:var(--border);margin:14px 0;}
+.sec-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:5px;}
+.toast{position:fixed;bottom:22px;right:20px;background:var(--text);color:var(--bg);padding:11px 18px;border-radius:10px;font-size:.85rem;font-weight:600;z-index:9999;box-shadow:var(--shadow-lg);animation:slideUp .3s ease;max-width:290px;}
+@keyframes slideUp{from{transform:translateY(18px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.empty{text-align:center;padding:44px 18px;color:var(--text3);}.empty-ico{font-size:2.8rem;margin-bottom:10px;}
+.exp-prev{background:var(--surface2);border-radius:8px;padding:13px;font-size:.78rem;color:var(--text2);max-height:180px;overflow-y:auto;font-family:monospace;border:1px solid var(--border);white-space:pre;margin-top:9px;}
+.gmute-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px;background:var(--surface2);border-radius:10px;margin-top:12px;}
+@media(max-width:600px){.app-header{flex-direction:column;align-items:flex-start;}.grid{grid-template-columns:1fr 1fr;}.r-card{flex-direction:column;align-items:flex-start;}.r-actions{width:100%;justify-content:flex-end;}.btn-group{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<div class="app-header">
+  <div class="logo-wrap">
+    <div class="logo-heart">&#x2764;&#xFE0F;</div>
+    <div><div class="app-title">My Heart Journal</div><div class="app-sub">Blood Pressure Tracker &middot; Personal Health Record</div></div>
+  </div>
+  <div class="hdr-right">
+    <div class="sync-pill" id="syncPill" onclick="switchTab('cloud')" title="Sync status">
+      <div class="sync-dot"></div><span id="syncLabel">Local only</span>
+    </div>
+    <span id="readingCount" style="font-size:.78rem;color:var(--text3)">0 readings</span>
+    <button class="btn btn-sec btn-sm" onclick="switchTab('settings')">&#x1F3A8;</button>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tbtn-add"      onclick="switchTab('add')">&#xFF0B; Add Reading</button>
+  <button class="tab-btn"        id="tbtn-history"  onclick="switchTab('history')">&#x1F4CB; History</button>
+  <button class="tab-btn"        id="tbtn-chart"    onclick="switchTab('chart')">&#x1F4C8; Trend</button>
+  <button class="tab-btn"        id="tbtn-ocr"      onclick="switchTab('ocr')">&#x1F4F7; Scan</button>
+  <button class="tab-btn"        id="tbtn-alarm"    onclick="switchTab('alarm')">&#x1F514; Reminders</button>
+  <button class="tab-btn"        id="tbtn-report"   onclick="switchTab('report')">&#x1F4C4; Reports</button>
+  <button class="tab-btn"        id="tbtn-cloud"    onclick="switchTab('cloud')">&#x2601;&#xFE0F; Cloud</button>
+  <button class="tab-btn"        id="tbtn-settings" onclick="switchTab('settings')">&#x2699;&#xFE0F; Settings</button>
+</div>
+
+<!-- ADD READING -->
+<div id="tab-add">
+  <div class="card">
+    <div class="card-title">&#x2764;&#xFE0F; New Blood Pressure Reading</div>
+    <div class="grid">
+      <div class="fg"><label>&#x1F4C5; Date</label><input type="date" id="f-date"></div>
+      <div class="fg"><label>&#x1F550; Time</label><input type="time" id="f-time"></div>
+      <div class="fg"><label>AM / PM</label><select id="f-ampm"><option value="AM">AM</option><option value="PM">PM</option></select></div>
+    </div>
+    <div class="divider"></div>
+    <div class="sec-label">Blood Pressure Readings</div>
+    <div class="grid" style="align-items:end">
+      <div class="fg"><label>&#x1F53C; Systolic (Top #)</label><input type="number" id="f-sys" class="bp-input" min="50" max="300" placeholder="120" oninput="liveStatus()"><div class="help">The higher number</div></div>
+      <div class="fg" style="align-items:center;justify-content:center;padding-top:18px"><span style="font-size:1.9rem;font-weight:700;color:var(--text3)">/</span></div>
+      <div class="fg"><label>&#x1F53D; Diastolic (Bottom #)</label><input type="number" id="f-dia" class="bp-input" min="30" max="200" placeholder="80" oninput="liveStatus()"><div class="help">The lower number</div></div>
+      <div class="fg"><label>&#x1F493; Pulse (BPM)</label><input type="number" id="f-pulse" class="bp-input" min="30" max="250" placeholder="72"></div>
+    </div>
+    <div id="liveBadge" class="bp-badge s-unknown" style="margin-bottom:10px">Enter readings above</div>
+    <div class="divider"></div>
+    <div class="sec-label">Details</div>
+    <div class="grid">
+      <div class="fg"><label>&#x1F4AA; Arm Used</label><select id="f-arm"><option value="">- Select -</option><option value="Left">Left Arm</option><option value="Right">Right Arm</option><option value="Both">Both (averaged)</option></select></div>
+      <div class="fg"><label>&#x1FA91; Position</label><select id="f-pos"><option value="">- Select -</option><option value="Sitting">Sitting</option><option value="Lying down">Lying Down</option><option value="Standing">Standing</option></select></div>
+      <div class="fg"><label>&#x1F60C; How You Feel</label><select id="f-feel"><option value="">- Select -</option><option value="Normal">Normal</option><option value="Dizzy">Dizzy</option><option value="Headache">Headache</option><option value="Tired">Tired</option><option value="Anxious">Anxious</option><option value="Chest tightness">Chest Tightness</option><option value="Other">Other</option></select></div>
+      <div class="fg"><label>&#x1F3C3; Activity (last 30 min)</label><select id="f-activity"><option value="Resting">Resting</option><option value="Light activity">Light Activity</option><option value="Exercise">Exercise</option><option value="After eating">After Eating</option><option value="After caffeine">After Caffeine</option><option value="After alcohol">After Alcohol</option></select></div>
+      <div class="fg"><label>&#x1F48A; Medication Taken?</label><select id="f-medtaken"><option value="">- Select -</option><option value="Yes - on time">Yes, on time</option><option value="Yes - late">Yes, but late</option><option value="No - forgot">No, forgot</option><option value="N/A">Not on medication</option></select></div>
+      <div class="fg"><label>&#x1F48A; Medication Name</label><input type="text" id="f-medname" placeholder="e.g. Lisinopril 10mg"></div>
+      <div class="fg full"><label>&#x1F4DD; Notes / Symptoms</label><textarea id="f-notes" placeholder="Headache, poor sleep, stressful day, extra water..."></textarea></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveReading()">&#x1F4BE; Save Reading</button>
+      <button class="btn btn-sec" onclick="clearForm()">&#x1F5D1;&#xFE0F; Clear</button>
+      <button class="btn btn-sec" onclick="setNow()">&#x1F550; Set to Now</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">&#x1F4CA; AHA Blood Pressure Reference</div>
+    <table class="ref-tbl">
+      <tr><th>Category</th><th>Systolic</th><th>Diastolic</th><th>What to Do</th></tr>
+      <tr style="color:var(--low)"><td>Low (Hypotension)</td><td>&lt;90</td><td>&lt;60</td><td>Talk to your doctor</td></tr>
+      <tr style="color:var(--normal)"><td>Normal</td><td>90-119</td><td>60-79</td><td>Great - keep it up!</td></tr>
+      <tr style="color:var(--elevated)"><td>Elevated</td><td>120-129</td><td>&lt;80</td><td>Lifestyle changes</td></tr>
+      <tr style="color:var(--stage1)"><td>High - Stage 1</td><td>130-139</td><td>80-89</td><td>Consult your doctor</td></tr>
+      <tr style="color:var(--stage2)"><td>High - Stage 2</td><td>140-179</td><td>90-119</td><td>See doctor soon</td></tr>
+      <tr style="color:var(--crisis)"><td>Hypertensive Crisis</td><td>180+</td><td>120+</td><td>Emergency care NOW</td></tr>
+    </table>
+    <div class="help" style="margin-top:7px">Per American Heart Association guidelines. This app does not replace medical advice.</div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="tab-history" style="display:none">
+  <div class="card">
+    <div class="card-title">&#x1F4CB; Reading History</div>
+    <div class="stats-row" id="statsRow"></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:11px">
+      <input type="text" id="hSearch" placeholder="Search..." style="flex:1;min-width:150px" oninput="renderHistory()">
+      <select id="hSort" onchange="renderHistory()" style="width:auto"><option value="desc">Newest First</option><option value="asc">Oldest First</option></select>
+      <select id="hFilter" onchange="renderHistory()" style="width:auto"><option value="all">All Categories</option><option value="Low">Low</option><option value="Normal">Normal</option><option value="Elevated">Elevated</option><option value="Stage 1">Stage 1</option><option value="Stage 2">Stage 2</option><option value="Crisis">Crisis</option></select>
+    </div>
+    <div id="readingsList" class="readings-list"></div>
+  </div>
+</div>
+
+<!-- CHART -->
+<div id="tab-chart" style="display:none">
+  <div class="card">
+    <div class="card-title">&#x1F4C8; Blood Pressure Trend</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:11px">
+      <label style="text-transform:none;font-size:.85rem;color:var(--text2);font-weight:normal">Show last:</label>
+      <select id="chartRange" onchange="renderChart()" style="width:auto"><option value="7">7 readings</option><option value="14">14 readings</option><option value="30" selected>30 readings</option><option value="all">All readings</option></select>
+    </div>
+    <div class="chart-wrap"><canvas id="bpChart"></canvas></div>
+    <div style="font-size:.75rem;color:var(--text3);margin-top:10px">Red = Systolic &nbsp; Blue = Diastolic &nbsp; Green = Pulse &nbsp; Dashes = reference lines (120/80)</div>
+  </div>
+</div>
+
+<!-- OCR -->
+<div id="tab-ocr" style="display:none">
+  <div class="card">
+    <div class="card-title">&#x1F4F7; Scan Blood Pressure Image (OCR)</div>
+    <p style="color:var(--text2);font-size:.86rem;margin-bottom:13px;line-height:1.55">Take a photo or screenshot of your blood pressure monitor, then tap below. The app tries to read the numbers automatically. You can always correct anything it gets wrong before saving.</p>
+    <div class="drop-zone" id="ocrDrop" onclick="document.getElementById('ocrFile').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="handleDrop(event)">
+      <div class="drop-icon">&#x1F4F7;</div>
+      <div class="drop-txt"><strong>Tap to choose a photo</strong> or drag and drop here<br>JPG, PNG, HEIC, screenshots all work</div>
+    </div>
+    <input type="file" id="ocrFile" accept="image/*" style="display:none" onchange="handleOcrFile(this.files[0])">
+    <div id="ocrContent" style="display:none">
+      <img id="ocrImg" class="ocr-img" alt="BP monitor preview">
+      <div id="ocrLoading" style="display:none;text-align:center;padding:18px 0">
+        <div class="spinner"></div>
+        <div style="color:var(--text2);font-size:.85rem;margin-top:9px" id="ocrLoadTxt">Reading image...</div>
+        <div class="prog-wrap"><div class="prog-fill" id="ocrProg" style="width:0%"></div></div>
+      </div>
+      <div id="ocrResult" style="display:none">
+        <div class="sec-label" style="margin-top:13px">Raw text detected:</div>
+        <div class="ocr-raw" id="ocrRaw"></div>
+        <div class="sec-label" style="margin-top:13px">Edit any values the scanner got wrong, then import:</div>
+        <div class="grid">
+          <div class="fg"><label>Systolic</label><input type="number" id="ocr-sys" class="bp-input" placeholder="120"></div>
+          <div class="fg"><label>Diastolic</label><input type="number" id="ocr-dia" class="bp-input" placeholder="80"></div>
+          <div class="fg"><label>Pulse</label><input type="number" id="ocr-pulse" class="bp-input" placeholder="72"></div>
+        </div>
+        <div class="help" style="margin-bottom:11px">Always double-check against your actual monitor before saving!</div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="importOcr()">&#x2705; Import to New Reading</button>
+          <button class="btn btn-sec" onclick="resetOcr()">&#x1F504; Scan Another</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALARMS -->
+<div id="tab-alarm" style="display:none">
+  <div class="card">
+    <div class="card-title">&#x1F514; Daily Reminders</div>
+    <p style="color:var(--text2);font-size:.86rem;line-height:1.55;margin-bottom:14px">Set daily reminders to take your blood pressure. Each reminder can be individually muted or unmuted. You can also mute all reminders at once with a timer.</p>
+    <div class="sec-label">Add a New Reminder</div>
+    <div class="grid" style="margin-bottom:10px">
+      <div class="fg"><label>Time</label><input type="time" id="al-time" value="08:00"></div>
+      <div class="fg"><label>AM / PM</label><select id="al-ampm"><option value="AM">AM</option><option value="PM">PM</option></select></div>
+      <div class="fg"><label>Label</label><input type="text" id="al-label" placeholder="Morning reading"></div>
+      <div class="fg"><label>Days</label><select id="al-days"><option value="daily">Every day</option><option value="weekdays">Weekdays only</option><option value="weekends">Weekends only</option></select></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="addAlarm()">Add Reminder</button>
+    <div class="divider"></div>
+    <div class="sec-label">Your Reminders</div>
+    <div id="alarmList"></div>
+    <div class="help" style="margin-top:10px">Browser notifications must be allowed for reminders to appear in the background. On iPhone (Safari), reminders only fire while the app is open. For background alerts on iPhone, also set an alarm in the Clock app.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#x1F507; Global Mute</div>
+    <p style="color:var(--text2);font-size:.86rem;margin-bottom:4px;line-height:1.5">Silence ALL reminders at once. Useful at the doctor, overnight, or whenever you need quiet. Set a timer so they automatically unmute.</p>
+    <div class="gmute-row">
+      <div id="globalMuteStatus" class="alarm-badge badge-active">All reminders active</div>
+      <div>
+        <div class="sec-label" style="margin-bottom:4px">Mute duration:</div>
+        <select id="muteDuration" style="width:auto"><option value="30">30 minutes</option><option value="60">1 hour</option><option value="120">2 hours</option><option value="480">8 hours</option><option value="1440">Until tomorrow</option><option value="0">Indefinitely</option></select>
+      </div>
+      <button class="btn btn-sec btn-sm" id="globalMuteBtn" onclick="toggleGlobalMute()">&#x1F507; Mute All</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div id="tab-report" style="display:none">
+  <div class="card">
+    <div class="card-title">&#x1F4C4; Export Reports</div>
+    <div class="sec-label">Date Range</div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+      <div class="fg"><label>From</label><input type="date" id="rep-from"></div>
+      <div class="fg"><label>To</label><input type="date" id="rep-to"></div>
+      <div class="fg"><label>Quick Range</label><select id="rep-quick" onchange="applyQuick()" style="width:auto"><option value="">Custom</option><option value="7">Last 7 days</option><option value="14">Last 14 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="all">All readings</option></select></div>
+      <button class="btn btn-sec btn-sm" onclick="previewReport()">Preview</button>
+    </div>
+    <div class="fg" style="margin-bottom:11px"><label>Report Name (optional)</label><input type="text" id="rep-name" placeholder="e.g. Dr Smith Visit - June 2026"></div>
+    <div class="sec-label">Include in Report</div>
+    <div style="display:flex;gap:13px;flex-wrap:wrap;margin-bottom:13px">
+      <label style="text-transform:none;display:flex;align-items:center;gap:6px;font-size:.86rem;color:var(--text2);font-weight:normal;cursor:pointer"><input type="checkbox" id="inc-stats" checked> Summary stats</label>
+      <label style="text-transform:none;display:flex;align-items:center;gap:6px;font-size:.86rem;color:var(--text2);font-weight:normal;cursor:pointer"><input type="checkbox" id="inc-notes" checked> Notes/symptoms</label>
+      <label style="text-transform:none;display:flex;align-items:center;gap:6px;font-size:.86rem;color:var(--text2);font-weight:normal;cursor:pointer"><input type="checkbox" id="inc-meds" checked> Medication info</label>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="exportPDF()">PDF</button>
+      <button class="btn btn-sec" onclick="exportCSV()">CSV</button>
+      <button class="btn btn-sec" onclick="exportTXT()">TXT</button>
+    </div>
+    <div id="repPreview" class="exp-prev" style="display:none"></div>
+  </div>
+</div>
+
+<!-- CLOUD -->
+<div id="tab-cloud" style="display:none">
+  <div class="card">
+    <div class="card-title">&#x2601;&#xFE0F; Cloud Sync and Backup</div>
+    <p style="color:var(--text2);font-size:.85rem;line-height:1.55;margin-bottom:14px">Your readings are always saved locally in this browser. Use the options below to sync across all your devices. You can use all three at once - FIREBAT is primary, Supabase is fallback, Google Drive is for file backups.</p>
+
+    <div class="cloud-sec">
+      <div class="cloud-title">&#x1F5A5;&#xFE0F; FIREBAT Homelab (Primary - Your Own Server)</div>
+      <div class="cloud-desc">Saves data to your FIREBAT server over Tailscale. Most private option - your data never leaves your own hardware. Requires the heartjournal-api Docker container on FIREBAT (ask Claude to help set it up - takes about 5 minutes).</div>
+      <div class="fg" style="margin-bottom:9px"><label>FIREBAT API URL</label><input type="text" id="fbUrl" placeholder="https://firebat.taild1c700.ts.net/heartjournal"></div>
+      <div class="btn-group" style="margin-top:0">
+        <button class="btn btn-sec btn-sm" onclick="fbTest()">Test Connection</button>
+        <button class="btn btn-sec btn-sm" onclick="fbSave()">Save to FIREBAT</button>
+        <button class="btn btn-sec btn-sm" onclick="fbLoad()">Load from FIREBAT</button>
+        <button class="btn btn-primary btn-sm" onclick="saveFbUrl()">Save URL</button>
+      </div>
+      <div id="fbStatus" class="cloud-status cs-off">Not configured</div>
+    </div>
+
+    <div class="cloud-sec">
+      <div class="cloud-title">&#x1F5C4;&#xFE0F; Supabase (Free Cloud Database - Fallback)</div>
+      <div class="cloud-desc">Free cloud database that syncs across all devices in real time. Good fallback when FIREBAT is unreachable. Requires a free account at supabase.com. Data is encrypted in transit and at rest.</div>
+      <div class="grid" style="margin-bottom:9px">
+        <div class="fg full"><label>Supabase Project URL</label><input type="text" id="sbUrl" placeholder="https://xyzxyz.supabase.co"></div>
+        <div class="fg full"><label>Supabase Anon Key</label><input type="text" id="sbKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>
+      </div>
+      <div class="btn-group" style="margin-top:0">
+        <button class="btn btn-sec btn-sm" onclick="sbTest()">Test Connection</button>
+        <button class="btn btn-sec btn-sm" onclick="sbSync()">Sync Now</button>
+        <button class="btn btn-primary btn-sm" onclick="saveSbConfig()">Save Config</button>
+      </div>
+      <div id="sbStatus" class="cloud-status cs-off">Not configured</div>
+    </div>
+
+    <div class="cloud-sec">
+      <div class="cloud-title">&#x1F4C1; Google Drive / OneDrive / Dropbox (File Backup)</div>
+      <div class="cloud-desc">Download your data as a JSON backup file and upload it to any cloud storage. Load it back on any device. Best for weekly backups or before doctor visits. Works everywhere with zero setup.</div>
+      <div class="btn-group" style="margin-top:0">
+        <button class="btn btn-sec btn-sm" onclick="exportJSON()">Download Backup (.json)</button>
+        <button class="btn btn-sec btn-sm" onclick="document.getElementById('importFile').click()">Load from Backup File</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+      </div>
+      <div class="cloud-desc" style="margin-top:9px;margin-bottom:0">After downloading, drag the .json file into Google Drive, OneDrive, or Dropbox. On another device, download it and use Load from Backup File.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="tab-settings" style="display:none">
+  <div class="card">
+    <div class="card-title">&#x1F3A8; App Theme</div>
+    <div class="theme-grid">
+      <div class="theme-opt" data-tid="default" onclick="setTheme('default')"><div class="swatch"><div class="sw" style="background:#f0f4f8"></div><div class="sw" style="background:#fff"></div><div class="sw" style="background:#c0392b"></div></div><div class="theme-name">Light</div></div>
+      <div class="theme-opt" data-tid="dark" onclick="setTheme('dark')"><div class="swatch"><div class="sw" style="background:#0f1923"></div><div class="sw" style="background:#1a2535"></div><div class="sw" style="background:#e74c3c"></div></div><div class="theme-name">Dark</div></div>
+      <div class="theme-opt" data-tid="contrast" onclick="setTheme('contrast')"><div class="swatch"><div class="sw" style="background:#000"></div><div class="sw" style="background:#111"></div><div class="sw" style="background:#ff4444"></div></div><div class="theme-name">High Contrast</div></div>
+      <div class="theme-opt" data-tid="soft" onclick="setTheme('soft')"><div class="swatch"><div class="sw" style="background:#fef9f5"></div><div class="sw" style="background:#fdf0e8"></div><div class="sw" style="background:#c0392b"></div></div><div class="theme-name">Warm Soft</div></div>
+      <div class="theme-opt" data-tid="large" onclick="setTheme('large')"><div class="swatch"><div class="sw" style="background:#f0f4f8"></div><div class="sw" style="background:#e8edf3"></div><div class="sw" style="background:#c0392b"></div></div><div class="theme-name">Large Text</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">&#x1F464; Your Profile</div>
+    <div class="grid">
+      <div class="fg"><label>Your Name</label><input type="text" id="p-name" placeholder="Don Reynolds"></div>
+      <div class="fg"><label>Doctor Name</label><input type="text" id="p-doc" placeholder="Dr. Smith"></div>
+      <div class="fg"><label>Date of Birth</label><input type="date" id="p-dob"></div>
+      <div class="fg"><label>Default Arm</label><select id="p-arm"><option value="">No preference</option><option value="Left">Left Arm</option><option value="Right">Right Arm</option></select></div>
+      <div class="fg full"><label>Current Medications (for reports)</label><textarea id="p-meds" placeholder="e.g. Lisinopril 10mg (morning), Amlodipine 5mg (evening)"></textarea></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="savePrefs()" style="margin-top:8px">Save Profile</button>
+  </div>
+  <div class="card">
+    <div class="card-title">&#x1F5D1;&#xFE0F; Data Management</div>
+    <div class="btn-group">
+      <button class="btn btn-sec" onclick="exportJSON()">Download Backup (.json)</button>
+      <button class="btn btn-sec" onclick="document.getElementById('importFile').click()">Restore from Backup</button>
+      <button class="btn btn-danger" onclick="clearAll()">Clear All Readings</button>
+    </div>
+    <div class="help" style="margin-top:8px">Always download a backup before clearing. This cannot be undone.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">&#x1F4F1; Install as App (PWA)</div>
+    <p style="color:var(--text2);font-size:.85rem;line-height:1.6"><strong>iPhone / Safari:</strong> Tap Share button then Add to Home Screen<br><strong>Android / Chrome:</strong> Tap menu then Add to Home Screen or Install App<br><strong>Windows / Chrome or Edge:</strong> Look for the install icon in the address bar<br><br>Once installed, it opens like a real app with no browser bar and works offline.</p>
+  </div>
+</div>
+
+</div>
+
+<!-- ALARM OVERLAY -->
+<div class="mute-overlay" id="alarmOverlay" style="display:none">
+  <div class="mute-box">
+    <div class="mute-heart">&#x2764;&#xFE0F;</div>
+    <div class="mute-title" id="alarmOverlayTitle">Time for your reading!</div>
+    <p style="color:var(--text2);font-size:.88rem;margin-bottom:18px;line-height:1.5" id="alarmOverlayMsg">Time to take your blood pressure reading.</p>
+    <div class="btn-group" style="justify-content:center">
+      <button class="btn btn-primary" onclick="dismissAlarm('take')">Take Reading Now</button>
+      <button class="btn btn-sec" onclick="dismissAlarm('snooze')">Snooze 10 min</button>
+      <button class="btn btn-sec" onclick="dismissAlarm('dismiss')">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal" style="display:none" onclick="if(event.target===this)closeEdit()">
+  <div class="modal-box">
+    <div class="modal-title">Edit Reading <button class="modal-close" onclick="closeEdit()">x</button></div>
+    <div id="editBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="display:none"></div>
+
+<script>
+const SK='mhj_r2',PK='mhj_p2',TK='mhj_t1',AK='mhj_a1',CK='mhj_c1';
+let readings=[],prefs={},alarms=[],cloudCfg={},chartInst=null,editingId=null,snoozeTimer=null,globalMuted=false,muteUntil=0;
+
+function load(){
+  try{readings=JSON.parse(localStorage.getItem(SK))||[];}catch{readings=[];}
+  try{prefs=JSON.parse(localStorage.getItem(PK))||{};}catch{prefs={};}
+  try{alarms=JSON.parse(localStorage.getItem(AK))||[];}catch{alarms=[];}
+  try{cloudCfg=JSON.parse(localStorage.getItem(CK))||{};}catch{cloudCfg={};}
+}
+function saveR(){localStorage.setItem(SK,JSON.stringify(readings));updateCount();}
+function saveA(){localStorage.setItem(AK,JSON.stringify(alarms));}
+function saveC(){localStorage.setItem(CK,JSON.stringify(cloudCfg));}
+function updateCount(){document.getElementById('readingCount').textContent=readings.length+(readings.length===1?' reading':' readings');}
+
+function classify(sys,dia){
+  sys=parseInt(sys);dia=parseInt(dia);
+  if(isNaN(sys)||isNaN(dia))return{label:'Unknown',cls:'s-unknown',e:'',color:'#aaa'};
+  if(sys<90||dia<60)return{label:'Low (Hypotension)',cls:'s-low',e:'Low',color:'#2980b9'};
+  if(sys<120&&dia<80)return{label:'Normal',cls:'s-normal',e:'Normal',color:'#27ae60'};
+  if(sys<130&&dia<80)return{label:'Elevated',cls:'s-elevated',e:'Elevated',color:'#f39c12'};
+  if(sys<140&&dia<90)return{label:'High - Stage 1',cls:'s-stage1',e:'Stage 1',color:'#e67e22'};
+  if(sys<180&&dia<120)return{label:'High - Stage 2',cls:'s-stage2',e:'Stage 2',color:'#c0392b'};
+  return{label:'CRISIS - Emergency Care!',cls:'s-crisis',e:'CRISIS',color:'#8e44ad'};
+}
+
+function switchTab(id){
+  ['add','history','chart','ocr','alarm','report','cloud','settings'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===id?'':'none';
+    const b=document.getElementById('tbtn-'+t);if(b)b.classList.toggle('active',t===id);
+  });
+  if(id==='history')renderHistory();
+  if(id==='chart')renderChart();
+  if(id==='alarm')renderAlarms();
+}
+
+function setNow(){
+  const n=new Date();
+  document.getElementById('f-date').value=n.toISOString().slice(0,10);
+  const h=n.getHours(),m=String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('f-time').value=String(h%12||12).padStart(2,'0')+':'+m;
+  document.getElementById('f-ampm').value=h<12?'AM':'PM';
+}
+function clearForm(){
+  ['f-date','f-time','f-sys','f-dia','f-pulse','f-notes','f-medname'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['f-ampm','f-arm','f-pos','f-feel','f-activity','f-medtaken'].forEach(id=>{const e=document.getElementById(id);if(e)e.selectedIndex=0;});
+  editingId=null;liveStatus();
+}
+function liveStatus(){
+  const sys=document.getElementById('f-sys').value,dia=document.getElementById('f-dia').value;
+  const el=document.getElementById('liveBadge'),c=classify(sys,dia);
+  el.className='bp-badge '+c.cls;
+  if(sys&&dia){el.textContent=sys+'/'+dia+' - '+c.label+(c.cls==='s-crisis'?' - Call 911!':'');}
+  else{el.className='bp-badge s-unknown';el.textContent='Enter readings above';}
+}
+function saveReading(){
+  const sys=document.getElementById('f-sys').value.trim(),dia=document.getElementById('f-dia').value.trim();
+  const date=document.getElementById('f-date').value;
+  if(!sys||!dia){toast('Enter systolic and diastolic values');return;}
+  if(!date){toast('Enter the date');return;}
+  const c=classify(sys,dia);
+  const entry={id:editingId||Date.now().toString(),date,time:document.getElementById('f-time').value,ampm:document.getElementById('f-ampm').value,sys:parseInt(sys),dia:parseInt(dia),pulse:parseInt(document.getElementById('f-pulse').value)||null,arm:document.getElementById('f-arm').value,pos:document.getElementById('f-pos').value,feel:document.getElementById('f-feel').value,activity:document.getElementById('f-activity').value,medtaken:document.getElementById('f-medtaken').value,medname:document.getElementById('f-medname').value.trim(),notes:document.getElementById('f-notes').value.trim(),status:c.label,cls:c.cls,savedAt:new Date().toISOString()};
+  if(editingId){const i=readings.findIndex(r=>r.id===editingId);if(i>=0)readings[i]=entry;editingId=null;closeEdit();toast('Reading updated');}
+  else{readings.push(entry);clearForm();toast('Reading saved!');}
+  readings.sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  saveR();autoSync();
+}
+
+function renderHistory(){
+  const search=(document.getElementById('hSearch').value||'').toLowerCase();
+  const filter=document.getElementById('hFilter').value;
+  const sortDir=document.getElementById('hSort').value;
+  let list=[...readings];
+  if(filter!=='all')list=list.filter(r=>r.status&&r.status.includes(filter));
+  if(search)list=list.filter(r=>(r.date+r.notes+r.sys+r.dia+r.arm+r.pos+r.medname).toLowerCase().includes(search));
+  if(sortDir==='asc')list.reverse();
+  renderStats(list);
+  const el=document.getElementById('readingsList');
+  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-ico">No readings found</div><div>Add your first in the Add Reading tab.</div></div>';return;}
+  const dc={'s-normal':'#27ae60','s-elevated':'#f39c12','s-stage1':'#e67e22','s-stage2':'#c0392b','s-crisis':'#8e44ad','s-low':'#2980b9','s-unknown':'#aaa'};
+  el.innerHTML=list.map(r=>{
+    const c=classify(r.sys,r.dia),dot=dc[r.cls]||'#aaa';
+    const ts=r.time?(r.time+' '+(r.ampm||'')):'';
+    const det=[r.arm,r.pos,r.activity].filter(Boolean).join(' - ');
+    return '<div class="r-card"><div class="r-dot" style="background:'+dot+'"></div><div><div class="r-bp">'+r.sys+'/'+r.dia+'</div><div class="r-pulse">'+(r.pulse?r.pulse+' bpm &nbsp;':'')+'<span class="bp-badge '+r.cls+'" style="padding:2px 8px;font-size:.7rem">'+r.status+'</span></div></div><div class="r-meta"><div class="r-date">'+fmtDate(r.date)+'</div><div class="r-detail">'+ts+(det?' - '+det:'')+'</div></div><div class="r-note">'+(r.notes?r.notes.slice(0,75)+(r.notes.length>75?'...':''):'')+'</div><div class="r-actions"><button class="btn btn-sec btn-sm btn-icon" onclick="openEdit(\''+r.id+'\')">Edit</button><button class="btn btn-danger btn-sm btn-icon" onclick="delReading(\''+r.id+'\')">Del</button></div></div>';
+  }).join('');
+}
+function renderStats(list){
+  const el=document.getElementById('statsRow');if(!el)return;
+  const data=list||readings;if(!data.length){el.innerHTML='';return;}
+  const aS=Math.round(data.reduce((a,r)=>a+r.sys,0)/data.length);
+  const aD=Math.round(data.reduce((a,r)=>a+r.dia,0)/data.length);
+  const ps=data.filter(r=>r.pulse);
+  const aP=ps.length?Math.round(ps.reduce((a,r)=>a+r.pulse,0)/ps.length):'--';
+  el.innerHTML='<div class="stat-box"><div class="stat-val">'+aS+'/'+aD+'</div><div class="stat-lbl">Avg BP</div></div><div class="stat-box"><div class="stat-val">'+Math.max(...data.map(r=>r.sys))+'</div><div class="stat-lbl">Highest Sys</div></div><div class="stat-box"><div class="stat-val">'+Math.min(...data.map(r=>r.sys))+'</div><div class="stat-lbl">Lowest Sys</div></div><div class="stat-box"><div class="stat-val">'+aP+'</div><div class="stat-lbl">Avg Pulse</div></div><div class="stat-box"><div class="stat-val">'+data.length+'</div><div class="stat-lbl">Readings</div></div>';
+}
+function delReading(id){if(!confirm('Delete this reading? Cannot be undone.'))return;readings=readings.filter(r=>r.id!==id);saveR();renderHistory();toast('Deleted');}
+function fmtDate(d){if(!d)return'';const[y,m,day]=d.split('-');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]+' '+parseInt(day)+', '+y;}
+
+function openEdit(id){
+  const r=readings.find(x=>x.id===id);if(!r)return;editingId=id;
+  ['date','time','sys','dia','pulse','notes','medname'].forEach(f=>{const e=document.getElementById('f-'+f);if(e)e.value=r[f]||'';});
+  ['ampm','arm','pos','feel','activity','medtaken'].forEach(f=>{const e=document.getElementById('f-'+f);if(e&&r[f])e.value=r[f];});
+  liveStatus();
+  document.getElementById('editBody').innerHTML='<p style="color:var(--text2);font-size:.86rem;margin-bottom:14px;line-height:1.5">The Add Reading tab has been filled with this reading. Close this dialog, go to Add Reading, make changes, then click Save Reading.</p><div class="btn-group"><button class="btn btn-primary" onclick="closeEdit();switchTab(\'add\')">Go to Edit Form</button><button class="btn btn-sec" onclick="closeEdit();editingId=null">Cancel</button></div>';
+  document.getElementById('editModal').style.display='flex';
+}
+function closeEdit(){document.getElementById('editModal').style.display='none';}
+
+function renderChart(){
+  const rv=document.getElementById('chartRange').value;
+  let data=[...readings].reverse();if(rv!=='all')data=data.slice(-parseInt(rv));
+  const labels=data.map(r=>fmtDate(r.date)+(r.time?' '+r.time:''));
+  const sD=data.map(r=>r.sys),dD=data.map(r=>r.dia),pD=data.map(r=>r.pulse||null);
+  const ctx=document.getElementById('bpChart');if(chartInst)chartInst.destroy();
+  const isDark=['dark','contrast'].includes(document.documentElement.getAttribute('data-theme'));
+  const gc=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.05)';
+  const tc=getComputedStyle(document.documentElement).getPropertyValue('--text2').trim()||'#666';
+  chartInst=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Systolic',data:sD,borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,.1)',fill:true,tension:.4,pointRadius:4,pointHoverRadius:7,borderWidth:2.5},{label:'Diastolic',data:dD,borderColor:'#3498db',backgroundColor:'rgba(52,152,219,.08)',fill:true,tension:.4,pointRadius:4,pointHoverRadius:7,borderWidth:2.5},{label:'Pulse',data:pD,borderColor:'#27ae60',fill:false,tension:.4,pointRadius:3,pointHoverRadius:6,borderWidth:1.5,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:tc,font:{size:11}}},tooltip:{callbacks:{afterBody(items){const c=classify(sD[items[0].dataIndex],dD[items[0].dataIndex]);return[c.label];}}}},scales:{x:{ticks:{color:tc,maxRotation:45,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc},grid:{color:gc},min:40}}}});
+}
+
+function handleDrop(e){e.preventDefault();document.getElementById('ocrDrop').classList.remove('over');const f=e.dataTransfer.files[0];if(f)handleOcrFile(f);}
+function handleOcrFile(file){
+  if(!file||!file.type.startsWith('image/')){toast('Please choose an image file');return;}
+  document.getElementById('ocrImg').src=URL.createObjectURL(file);
+  document.getElementById('ocrContent').style.display='';document.getElementById('ocrLoading').style.display='';
+  document.getElementById('ocrResult').style.display='none';document.getElementById('ocrDrop').style.display='none';
+  Tesseract.recognize(file,'eng',{logger:m=>{if(m.status==='recognizing text'){document.getElementById('ocrProg').style.width=Math.round(m.progress*100)+'%';document.getElementById('ocrLoadTxt').textContent='Reading image... '+Math.round(m.progress*100)+'%';}}}).then(({data:{text}})=>{document.getElementById('ocrLoading').style.display='none';document.getElementById('ocrResult').style.display='';document.getElementById('ocrRaw').textContent=text;parseOcr(text);}).catch(e=>{document.getElementById('ocrLoading').style.display='none';toast('OCR error: '+e.message);});
+}
+function parseOcr(text){
+  const bpM=text.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+  if(bpM){document.getElementById('ocr-sys').value=bpM[1];document.getElementById('ocr-dia').value=bpM[2];}
+  const pps=[/pulse[:\s]+(\d{2,3})/i,/\bHR[:\s]+(\d{2,3})\b/i,/(\d{2,3})\s*bpm/i];
+  for(const p of pps){const m=text.match(p);if(m){document.getElementById('ocr-pulse').value=m[1];break;}}
+}
+function importOcr(){
+  const sys=document.getElementById('ocr-sys').value,dia=document.getElementById('ocr-dia').value;
+  if(!sys||!dia){toast('Enter at least systolic and diastolic');return;}
+  document.getElementById('f-sys').value=sys;document.getElementById('f-dia').value=dia;document.getElementById('f-pulse').value=document.getElementById('ocr-pulse').value||'';
+  setNow();liveStatus();switchTab('add');toast('Values imported - review and save!');
+}
+function resetOcr(){document.getElementById('ocrDrop').style.display='';document.getElementById('ocrContent').style.display='none';document.getElementById('ocrFile').value='';document.getElementById('ocrProg').style.width='0%';}
+
+function addAlarm(){
+  const time=document.getElementById('al-time').value;
+  const ampm=document.getElementById('al-ampm').value;
+  const label=document.getElementById('al-label').value.trim()||'Blood pressure reminder';
+  const days=document.getElementById('al-days').value;
+  if(!time){toast('Choose a time');return;}
+  alarms.push({id:Date.now().toString(),time,ampm,label,days,active:true,muted:false});
+  saveA();renderAlarms();toast('Reminder added');requestNotifPermission();
+}
+function renderAlarms(){
+  const el=document.getElementById('alarmList');
+  if(!alarms.length){el.innerHTML='<div class="empty" style="padding:20px">No reminders yet. Add one above.</div>';return;}
+  const dayLabel={daily:'Every day',weekdays:'Weekdays',weekends:'Weekends'};
+  el.innerHTML=alarms.map(a=>'<div class="alarm-card"><div class="alarm-time">'+a.time+' '+a.ampm+'</div><div class="alarm-label"><div style="font-weight:600">'+a.label+'</div><div style="font-size:.75rem;color:var(--text3);margin-top:2px">'+(dayLabel[a.days]||a.days)+'</div></div><div class="alarm-badge '+(a.muted?'badge-muted':a.active?'badge-active':'badge-off')+'">'+(a.muted?'Muted':a.active?'Active':'Disabled')+'</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sec btn-sm" onclick="toggleMute(\''+a.id+'\')">'+(a.muted?'Unmute':'Mute')+'</button><button class="btn btn-sec btn-sm" onclick="toggleAlarm(\''+a.id+'\')">'+(a.active?'Disable':'Enable')+'</button><button class="btn btn-danger btn-sm" onclick="delAlarm(\''+a.id+'\')">Delete</button></div></div>').join('');
+  updateGlobalMuteUI();
+}
+function toggleMute(id){const a=alarms.find(x=>x.id===id);if(!a)return;a.muted=!a.muted;saveA();renderAlarms();toast(a.muted?'Reminder muted':'Reminder unmuted');}
+function toggleAlarm(id){const a=alarms.find(x=>x.id===id);if(!a)return;a.active=!a.active;saveA();renderAlarms();toast(a.active?'Reminder enabled':'Reminder disabled');}
+function delAlarm(id){if(!confirm('Delete this reminder?'))return;alarms=alarms.filter(x=>x.id!==id);saveA();renderAlarms();toast('Deleted');}
+
+function toggleGlobalMute(){
+  globalMuted=!globalMuted;
+  if(globalMuted){const mins=parseInt(document.getElementById('muteDuration').value);muteUntil=mins>0?Date.now()+mins*60000:Infinity;toast('All reminders muted'+(mins>0?' for '+fmtMute(mins):''));}
+  else{muteUntil=0;toast('All reminders unmuted');}
+  updateGlobalMuteUI();
+}
+function fmtMute(m){if(m>=1440)return'until tomorrow';if(m>=60)return Math.round(m/60)+' hour'+(m>=120?'s':'');return m+' min';}
+function updateGlobalMuteUI(){
+  const s=document.getElementById('globalMuteStatus'),b=document.getElementById('globalMuteBtn');if(!s||!b)return;
+  const isMuted=globalMuted&&(muteUntil===Infinity||Date.now()<muteUntil);
+  if(!isMuted&&globalMuted){globalMuted=false;muteUntil=0;}
+  s.className='alarm-badge '+(isMuted?'badge-muted':'badge-active');
+  s.textContent=isMuted?'All reminders muted':'All reminders active';
+  b.textContent=isMuted?'Unmute All':'Mute All';
+}
+
+function checkAlarms(){
+  updateGlobalMuteUI();
+  if(globalMuted&&(muteUntil===Infinity||Date.now()<muteUntil))return;
+  const now=new Date(),dow=now.getDay(),curH=now.getHours(),curM=now.getMinutes();
+  alarms.forEach(a=>{
+    if(!a.active||a.muted)return;
+    if(a.days==='weekdays'&&(dow===0||dow===6))return;
+    if(a.days==='weekends'&&dow>=1&&dow<=5)return;
+    let[h,m]=a.time.split(':').map(Number);
+    if(a.ampm==='PM'&&h<12)h+=12;if(a.ampm==='AM'&&h===12)h=0;
+    if(h===curH&&m===curM)fireAlarm(a);
+  });
+}
+let lastFired='';
+function fireAlarm(a){
+  const key=a.id+'-'+new Date().toISOString().slice(0,16);if(lastFired===key)return;lastFired=key;
+  document.getElementById('alarmOverlayTitle').textContent=a.label;
+  document.getElementById('alarmOverlayMsg').textContent='Time to take your blood pressure reading! ('+a.time+' '+a.ampm+' reminder)';
+  document.getElementById('alarmOverlay').style.display='flex';
+  playChime();sendNotif(a.label,'Time to take your blood pressure reading!');
+}
+function dismissAlarm(action){
+  document.getElementById('alarmOverlay').style.display='none';
+  if(action==='take'){switchTab('add');toast('Take your reading now!');}
+  if(action==='snooze'){clearTimeout(snoozeTimer);snoozeTimer=setTimeout(()=>{document.getElementById('alarmOverlay').style.display='flex';playChime();},10*60*1000);toast('Snoozed 10 minutes');}
+}
+function playChime(){
+  try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[523.25,659.25,783.99].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0,ctx.currentTime+i*.18);g.gain.linearRampToValueAtTime(.25,ctx.currentTime+i*.18+.05);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.18+.5);o.start(ctx.currentTime+i*.18);o.stop(ctx.currentTime+i*.18+.5);});}catch(e){}
+}
+function requestNotifPermission(){if('Notification'in window&&Notification.permission==='default')Notification.requestPermission();}
+function sendNotif(title,body){if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body});}
+
+function getRepR(){const from=document.getElementById('rep-from').value,to=document.getElementById('rep-to').value;return readings.filter(r=>(!from||r.date>=from)&&(!to||r.date<=to));}
+function applyQuick(){const v=document.getElementById('rep-quick').value,to=new Date().toISOString().slice(0,10);if(!v||v==='all'){document.getElementById('rep-from').value='';document.getElementById('rep-to').value='';return;}const f=new Date();f.setDate(f.getDate()-parseInt(v));document.getElementById('rep-from').value=f.toISOString().slice(0,10);document.getElementById('rep-to').value=to;}
+function buildTxt(list){
+  const n=document.getElementById('rep-name').value||'Blood Pressure Report';
+  const iS=document.getElementById('inc-stats').checked,iN=document.getElementById('inc-notes').checked,iM=document.getElementById('inc-meds').checked;
+  const from=document.getElementById('rep-from').value||'All dates',to=document.getElementById('rep-to').value||'Present';
+  let o='====================================\n     MY HEART JOURNAL\n     '+n+'\n====================================\nPatient:   '+(prefs.name||'Patient')+'\n';
+  if(prefs.doctor)o+='Doctor:    '+prefs.doctor+'\n';
+  o+='Period:    '+from+' to '+to+'\nGenerated: '+new Date().toLocaleString()+'\n------------------------------------\n\n';
+  if(iS&&list.length){const aS=Math.round(list.reduce((a,r)=>a+r.sys,0)/list.length),aD=Math.round(list.reduce((a,r)=>a+r.dia,0)/list.length),c=classify(aS,aD);o+='SUMMARY ('+list.length+' readings)\n  Average: '+aS+'/'+aD+' - '+c.label+'\n  Highest: '+Math.max(...list.map(r=>r.sys))+' sys\n  Lowest:  '+Math.min(...list.map(r=>r.sys))+' sys\n';const ps=list.filter(r=>r.pulse);if(ps.length)o+='  Avg Pulse: '+Math.round(ps.reduce((a,r)=>a+r.pulse,0)/ps.length)+' bpm\n';o+='\n';}
+  if(iM&&prefs.meds)o+='MEDICATIONS\n  '+prefs.meds+'\n\n';
+  o+='READINGS\n------------------------------------\n';
+  list.forEach(r=>{o+=fmtDate(r.date)+' '+(r.time||'')+' '+(r.ampm||'')+'\n  BP: '+r.sys+'/'+r.dia+' - '+r.status+'\n';if(r.pulse)o+='  Pulse: '+r.pulse+' bpm\n';if(r.arm)o+='  Arm: '+r.arm+'\n';if(r.pos)o+='  Position: '+r.pos+'\n';if(iM&&r.medtaken)o+='  Medication: '+r.medtaken+(r.medname?' ('+r.medname+')':'')+'\n';if(iN&&r.notes)o+='  Notes: '+r.notes+'\n';o+='\n';});
+  return o;
+}
+function previewReport(){const list=getRepR();const el=document.getElementById('repPreview');el.textContent=buildTxt(list);el.style.display='';}
+function exportTXT(){const list=getRepR();if(!list.length){toast('No readings in range');return;}dl(buildTxt(list),'my-heart-journal.txt','text/plain');toast('TXT downloaded');}
+function exportCSV(){const list=getRepR();if(!list.length){toast('No readings in range');return;}const h=['Date','Time','AM/PM','Systolic','Diastolic','Pulse','Status','Arm','Position','Activity','Feeling','Med Taken','Med Name','Notes'];const rows=list.map(r=>[r.date,r.time,r.ampm,r.sys,r.dia,r.pulse||'',r.status,r.arm,r.pos,r.activity,r.feel,r.medtaken,r.medname,(r.notes||'').replace(/,/g,';').replace(/\n/g,' ')]);const csv=[h,...rows].map(row=>row.map(v=>'"'+(v||'')+'"').join(',')).join('\n');dl(csv,'my-heart-journal.csv','text/csv');toast('CSV downloaded');}
+function exportPDF(){
+  const list=getRepR();if(!list.length){toast('No readings in range');return;}
+  const{jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'letter'}),lm=18,pw=175,lh=6.2;let y=28;
+  function line(text,sz,bold,col){doc.setFontSize(sz||10.5);doc.setFont('helvetica',bold?'bold':'normal');if(col)doc.setTextColor(...col);else doc.setTextColor(35,35,35);const lines=doc.splitTextToSize(text,pw);lines.forEach(l=>{doc.text(l,lm,y);y+=lh;if(y>265){doc.addPage();y=22;}});}
+  function hr(){doc.setDrawColor(180,180,180);doc.line(lm,y,lm+pw,y);y+=4;}
+  doc.setFillColor(192,57,43);doc.rect(0,0,216,20,'F');doc.setTextColor(255,255,255);doc.setFontSize(15);doc.setFont('helvetica','bold');doc.text('My Heart Journal',lm,12);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text(document.getElementById('rep-name').value||'Blood Pressure Report',lm,18.5);
+  doc.setTextColor(35,35,35);line('Patient: '+(prefs.name||'Patient'),10,false);if(prefs.doctor)line('Doctor: '+prefs.doctor,10);line('Generated: '+new Date().toLocaleString(),9,false,[110,110,110]);y+=1;hr();
+  const iS=document.getElementById('inc-stats').checked,iN=document.getElementById('inc-notes').checked,iM=document.getElementById('inc-meds').checked;
+  if(iS&&list.length){const aS=Math.round(list.reduce((a,r)=>a+r.sys,0)/list.length),aD=Math.round(list.reduce((a,r)=>a+r.dia,0)/list.length),c=classify(aS,aD);line('SUMMARY - '+list.length+' readings',10.5,true,[90,90,90]);line('Average BP: '+aS+'/'+aD+' ('+c.label+')',10);line('Highest: '+Math.max(...list.map(r=>r.sys))+' sys  |  Lowest: '+Math.min(...list.map(r=>r.sys))+' sys',10);y+=1;hr();}
+  if(iM&&prefs.meds){line('MEDICATIONS',10.5,true,[90,90,90]);line(prefs.meds,9);y+=1;hr();}
+  line('READINGS',10.5,true,[90,90,90]);
+  const cm={'s-normal':[39,174,96],'s-elevated':[180,130,0],'s-stage1':[180,90,0],'s-stage2':[160,30,30],'s-crisis':[120,30,150],'s-low':[30,100,170]};
+  list.forEach(r=>{if(y>245){doc.addPage();y=22;}doc.setFillColor(246,246,246);doc.rect(lm-2,y-4,pw+4,iN&&r.notes?29:22,'F');line(fmtDate(r.date)+(r.time?' '+r.time+' '+(r.ampm||''):''),10.5,true);const cc=cm[r.cls]||[80,80,80];doc.setTextColor(...cc);doc.setFontSize(10.5);doc.setFont('helvetica','bold');doc.text(r.sys+'/'+r.dia+' - '+r.status,lm+4,y);y+=lh;doc.setTextColor(90,90,90);doc.setFontSize(9);doc.setFont('helvetica','normal');const meta=[r.pulse?'Pulse: '+r.pulse+' bpm':null,r.arm,r.pos,r.activity].filter(Boolean).join('  |  ');if(meta){doc.text(meta,lm+4,y);y+=lh;}if(iM&&r.medtaken){doc.text('Med: '+r.medtaken+(r.medname?' ('+r.medname+')':''),lm+4,y);y+=lh;}if(iN&&r.notes){const ns=doc.splitTextToSize('Notes: '+r.notes.slice(0,120),pw-6);ns.forEach(l=>{doc.text(l,lm+4,y);y+=lh;});}y+=2;});
+  doc.save('my-heart-journal.pdf');toast('PDF downloaded');
+}
+
+function saveFbUrl(){cloudCfg.fbUrl=document.getElementById('fbUrl').value.trim();saveC();toast('FIREBAT URL saved');}
+function saveSbConfig(){cloudCfg.sbUrl=document.getElementById('sbUrl').value.trim();cloudCfg.sbKey=document.getElementById('sbKey').value.trim();saveC();toast('Supabase config saved');}
+async function fbTest(){
+  const url=cloudCfg.fbUrl||(document.getElementById('fbUrl').value.trim());if(!url){toast('Enter FIREBAT URL first');return;}
+  setSyncStatus('syncing','Testing...');
+  try{const r=await fetch(url+'/ping',{signal:AbortSignal.timeout(5000)});if(r.ok){document.getElementById('fbStatus').className='cloud-status cs-ok';document.getElementById('fbStatus').textContent='Connected to FIREBAT!';setSyncStatus('synced','FIREBAT connected');}else throw new Error('HTTP '+r.status);}
+  catch(e){document.getElementById('fbStatus').className='cloud-status cs-err';document.getElementById('fbStatus').textContent='Cannot reach FIREBAT: '+e.message+'. Is Tailscale running? Is heartjournal-api container running?';setSyncStatus('error','FIREBAT unreachable');}
+}
+async function fbSave(){const url=cloudCfg.fbUrl;if(!url){toast('Set FIREBAT URL first');return;}setSyncStatus('syncing','Saving...');try{const r=await fetch(url+'/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({readings,prefs}),signal:AbortSignal.timeout(8000)});if(r.ok){toast('Saved to FIREBAT');setSyncStatus('synced','Saved to FIREBAT');}else throw new Error('HTTP '+r.status);}catch(e){toast('FIREBAT save failed: '+e.message);setSyncStatus('error','Save failed');}}
+async function fbLoad(){const url=cloudCfg.fbUrl;if(!url){toast('Set FIREBAT URL first');return;}setSyncStatus('syncing','Loading...');try{const r=await fetch(url+'/load',{signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();if(!d.readings)throw new Error('Invalid response');if(confirm('Load '+d.readings.length+' readings from FIREBAT? Replaces local data.')){readings=d.readings;if(d.prefs)prefs=d.prefs;saveR();loadPrefsUI();setSyncStatus('synced','Loaded from FIREBAT');toast('Loaded '+readings.length+' readings from FIREBAT');}}catch(e){toast('FIREBAT load failed: '+e.message);setSyncStatus('error','Load failed');}}
+async function sbTest(){const url=cloudCfg.sbUrl,key=cloudCfg.sbKey;if(!url||!key){toast('Enter Supabase URL and key first');return;}setSyncStatus('syncing','Testing...');try{const r=await fetch(url+'/rest/v1/',{headers:{'apikey':key,'Authorization':'Bearer '+key},signal:AbortSignal.timeout(6000)});if(r.ok||r.status===404){document.getElementById('sbStatus').className='cloud-status cs-ok';document.getElementById('sbStatus').textContent='Connected to Supabase!';setSyncStatus('synced','Supabase connected');}else throw new Error('HTTP '+r.status);}catch(e){document.getElementById('sbStatus').className='cloud-status cs-err';document.getElementById('sbStatus').textContent='Error: '+e.message;setSyncStatus('error','Supabase error');}}
+async function sbSync(){const url=cloudCfg.sbUrl,key=cloudCfg.sbKey;if(!url||!key){toast('Configure Supabase first');return;}setSyncStatus('syncing','Syncing...');try{const r=await fetch(url+'/rest/v1/readings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(readings.map(x=>({id:x.id,data:JSON.stringify(x),updated_at:x.savedAt||new Date().toISOString()}))),signal:AbortSignal.timeout(10000)});if(r.ok||r.status===201){toast('Synced to Supabase');setSyncStatus('synced','Synced to Supabase');}else throw new Error('HTTP '+r.status);}catch(e){toast('Supabase sync failed: '+e.message);setSyncStatus('error','Sync failed');}}
+function setSyncStatus(state,label){const p=document.getElementById('syncPill'),l=document.getElementById('syncLabel');p.className='sync-pill '+state;l.textContent=label;}
+async function autoSync(){if(cloudCfg.fbUrl){try{await fbSave();return;}catch{}}if(cloudCfg.sbUrl&&cloudCfg.sbKey){try{await sbSync();}catch{}}}
+
+function exportJSON(){dl(JSON.stringify({readings,prefs,exportedAt:new Date().toISOString(),version:'2'},[],2),'my-heart-journal-backup.json','application/json');toast('Backup downloaded');}
+function importJSON(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.readings)throw new Error('Invalid');if(!confirm('Replace '+readings.length+' readings with '+d.readings.length+' from backup?'))return;readings=d.readings;if(d.prefs)prefs=d.prefs;saveR();loadPrefsUI();toast('Restored - '+readings.length+' readings');}catch{toast('Invalid backup file');}};reader.readAsText(file);input.value='';}
+function dl(content,filename,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=filename;a.click();}
+
+function setTheme(t){const root=document.documentElement;if(t==='default')root.removeAttribute('data-theme');else root.setAttribute('data-theme',t);localStorage.setItem(TK,t);document.querySelectorAll('.theme-opt').forEach(el=>el.classList.toggle('active',el.dataset.tid===t));if(chartInst)setTimeout(renderChart,100);}
+
+function savePrefs(){prefs.name=document.getElementById('p-name').value;prefs.doctor=document.getElementById('p-doc').value;prefs.dob=document.getElementById('p-dob').value;prefs.arm=document.getElementById('p-arm').value;prefs.meds=document.getElementById('p-meds').value;localStorage.setItem(PK,JSON.stringify(prefs));toast('Profile saved');}
+function loadPrefsUI(){if(prefs.name)document.getElementById('p-name').value=prefs.name;if(prefs.doctor)document.getElementById('p-doc').value=prefs.doctor;if(prefs.dob)document.getElementById('p-dob').value=prefs.dob;if(prefs.arm){document.getElementById('p-arm').value=prefs.arm;document.getElementById('f-arm').value=prefs.arm;}if(prefs.meds)document.getElementById('p-meds').value=prefs.meds;if(cloudCfg.fbUrl)document.getElementById('fbUrl').value=cloudCfg.fbUrl;if(cloudCfg.sbUrl)document.getElementById('sbUrl').value=cloudCfg.sbUrl;if(cloudCfg.sbKey)document.getElementById('sbKey').value=cloudCfg.sbKey;}
+function clearAll(){if(!confirm('Permanently delete ALL '+readings.length+' readings? Cannot be undone!'))return;readings=[];saveR();renderHistory();toast('All cleared');}
+let toastTmr;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastTmr);toastTmr=setTimeout(()=>el.style.display='none',3400);}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  load();setNow();updateCount();loadPrefsUI();renderStats();
+  const t=localStorage.getItem(TK)||'default';setTheme(t);
+  const now=new Date();document.getElementById('rep-to').value=now.toISOString().slice(0,10);const f30=new Date();f30.setDate(f30.getDate()-30);document.getElementById('rep-from').value=f30.toISOString().slice(0,10);
+  setInterval(checkAlarms,30000);checkAlarms();
+  if(alarms.length)requestNotifPermission();
+});
+</script>
+</body>
+</html>

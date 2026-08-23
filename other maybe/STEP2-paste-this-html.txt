@@ -1,0 +1,194 @@
+============================================================
+STEP 2 OF 2 — PASTE THIS HTML+JS INTO THE HEART JOURNAL APP
+============================================================
+
+WHERE TO PASTE:
+  Still editing heartjournal/index.html on GitHub.
+  Scroll to the very bottom of the file.
+  Find this line near the end:
+    <div class="toast" id="toast" style="display:none"></div>
+  Paste the entire block below AFTER that line, just before </body>.
+
+IMPORTANT — AFTER PASTING:
+  Find this line in the pasted JS:
+    const FORMSPREE_ID = 'YOUR_FORM_ID';
+  Replace YOUR_FORM_ID with the real ID from Formspree.
+  (See Formspree setup instructions below.)
+
+============================================================
+PASTE THE FOLLOWING HTML + JAVASCRIPT:
+============================================================
+
+<!-- ===== FEEDBACK BUTTON ===== -->
+<button class="fb-btn" onclick="openFeedback()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  Feedback
+</button>
+
+<!-- ===== FEEDBACK MODAL ===== -->
+<div class="fb-overlay" id="fbOverlay" onclick="if(event.target===this)closeFeedback()">
+  <div class="fb-modal">
+    <div class="fb-modal-header">
+      <div class="fb-modal-title">&#x1F4AC; Leave Feedback</div>
+      <button class="fb-close" onclick="closeFeedback()">&#x2715;</button>
+    </div>
+    <div class="fb-subtitle">Found a bug? Have a question or idea? I read every message.</div>
+
+    <div id="fbForm">
+      <div class="fb-field">
+        <label class="fb-label">Type of Feedback</label>
+        <select class="fb-select" id="fb-type">
+          <option value="Bug Report">&#x1F41B; Bug Report &#x2014; something isn't working</option>
+          <option value="Question">&#x2753; Question &#x2014; I need help with something</option>
+          <option value="Suggestion">&#x1F4A1; Suggestion &#x2014; I have an idea</option>
+          <option value="Other">&#x1F4AC; Other</option>
+        </select>
+      </div>
+      <div class="fb-row">
+        <div class="fb-field">
+          <label class="fb-label">Your Name</label>
+          <input class="fb-input" type="text" id="fb-name" placeholder="Margaret" required>
+        </div>
+        <div class="fb-field">
+          <label class="fb-label">Email</label>
+          <input class="fb-input" type="email" id="fb-email" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="fb-field">
+        <label class="fb-label">Phone <span class="fb-opt">(optional)</span></label>
+        <input class="fb-input" type="tel" id="fb-phone" placeholder="(555) 123-4567">
+      </div>
+      <div class="fb-field">
+        <label class="fb-label">Message</label>
+        <textarea class="fb-textarea" id="fb-message" placeholder="Tell me what happened, or what you'd like to see..." required></textarea>
+      </div>
+      <div class="fb-error" id="fbError"></div>
+      <button class="fb-submit" id="fbSubmit" onclick="submitFeedback()">
+        <span id="fbSubmitLabel">Send Message</span>
+      </button>
+    </div>
+
+    <div class="fb-success" id="fbSuccess">
+      <div class="fb-success-icon">&#x2705;</div>
+      <div class="fb-success-title">Message sent! Thank you.</div>
+      <div class="fb-success-msg">
+        I'll reply to your email as soon as I can.<br><br>
+        <button class="fb-submit" style="width:auto;padding:10px 22px;margin-top:10px" onclick="closeFeedback()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== FEEDBACK WIDGET =====
+// Replace YOUR_FORM_ID with your actual Formspree form ID (e.g. 'xabc1234')
+const FORMSPREE_ID = 'YOUR_FORM_ID';
+
+function openFeedback() {
+  document.getElementById('fbForm').style.display = '';
+  document.getElementById('fbSuccess').style.display = 'none';
+  document.getElementById('fbError').style.display = 'none';
+  document.getElementById('fbSubmit').disabled = false;
+  document.getElementById('fbSubmitLabel').textContent = 'Send Message';
+  document.getElementById('fbOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('fb-name').focus(), 300);
+}
+
+function closeFeedback() {
+  document.getElementById('fbOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeFeedback();
+});
+
+async function submitFeedback() {
+  const name    = document.getElementById('fb-name').value.trim();
+  const email   = document.getElementById('fb-email').value.trim();
+  const phone   = document.getElementById('fb-phone').value.trim();
+  const message = document.getElementById('fb-message').value.trim();
+  const type    = document.getElementById('fb-type').value;
+  const errEl   = document.getElementById('fbError');
+  const btn     = document.getElementById('fbSubmit');
+  const lbl     = document.getElementById('fbSubmitLabel');
+
+  errEl.style.display = 'none';
+  if (!name)                          { showFbError('Please enter your name.'); return; }
+  if (!email || !email.includes('@')) { showFbError('Please enter a valid email address.'); return; }
+  if (!message)                       { showFbError('Please write a message before sending.'); return; }
+
+  btn.disabled = true;
+  lbl.textContent = 'Sending\u2026';
+
+  try {
+    const res = await fetch('https://formspree.io/f/' + FORMSPREE_ID, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        type:     type,
+        name:     name,
+        email:    email,
+        phone:    phone || 'Not provided',
+        message:  message,
+        page:     window.location.hostname + window.location.pathname,
+        _replyto: email,
+        _subject: '[Retro Homelab] ' + type + ' from ' + name
+      })
+    });
+
+    if (res.ok) {
+      document.getElementById('fbForm').style.display = 'none';
+      document.getElementById('fbSuccess').style.display = 'block';
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showFbError(data.error || 'Something went wrong. Please email donreynolds+heartjournal@gmail.com directly.');
+      btn.disabled = false;
+      lbl.textContent = 'Send Message';
+    }
+  } catch (err) {
+    showFbError('Could not send \u2014 check your internet connection, or email donreynolds+heartjournal@gmail.com directly.');
+    btn.disabled = false;
+    lbl.textContent = 'Send Message';
+  }
+}
+
+function showFbError(msg) {
+  const el = document.getElementById('fbError');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+
+============================================================
+END OF HTML+JS
+============================================================
+
+============================================================
+FORMSPREE SETUP — takes about 2 minutes
+============================================================
+
+1. Go to https://formspree.io and click "Get Started Free"
+2. Sign up with donreynolds@gmail.com
+3. Click "New Form"
+4. Name it: "Retro Homelab Feedback"
+5. Set the email to: donreynolds+heartjournal@gmail.com
+6. Click "Create Form"
+7. You'll get a URL like: https://formspree.io/f/abcd1234
+   Your form ID is the part after /f/ — in this example: abcd1234
+8. In the heartjournal/index.html file, find:
+      const FORMSPREE_ID = 'YOUR_FORM_ID';
+   Replace YOUR_FORM_ID with your actual ID (keep the quotes):
+      const FORMSPREE_ID = 'abcd1234';
+9. Do the same in the landing page index.html
+10. Save and commit — done!
+
+First submission will trigger a confirmation email to donreynolds@gmail.com.
+Click the confirmation link and you're live.
+
+Free tier: 50 submissions/month. More than enough for a hobby project.
+============================================================
