@@ -1,0 +1,13 @@
+{
+  "globalEnabled": false,
+  "sourceCommercialsFromOneLibrary": true,
+  "globalAlignmentMinutes": 15,
+  "globalCountBetweenShows": 1,
+  "globalMediaRatingKey": null,
+  "globalMediaTitle": null,
+  "globalMediaIsTvShow": false,
+  "channels": {},
+  "commercialLibraries": [],
+  "commercialLibraryId": null,
+  "commercialServerId": null
+}

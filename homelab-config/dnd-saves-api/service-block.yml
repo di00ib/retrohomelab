@@ -1,0 +1,17 @@
+  dnd-saves-api:
+    image: node:20-alpine
+    container_name: dnd-saves-api
+    restart: unless-stopped
+    networks: [homelab]
+    working_dir: /app
+    command: node server.js
+    environment:
+      PORT: "7846"
+      DATA_DIR: /data
+      API_KEY: ${DND_SAVES_API_KEY}
+    ports:
+      - "7846:7846"
+    volumes:
+      - ./dnd-saves-api/server.js:/app/server.js:ro
+      - /mnt/nvme1tb/dnd-saves-data:/data
+

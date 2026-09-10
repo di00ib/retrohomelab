@@ -1,0 +1,24 @@
+[
+  {
+    "id": "f8d5eb2e-31aa-4df0-b463-8e432a0893bc",
+    "name": "Don",
+    "type": "ADULT",
+    "isAdmin": true,
+    "isDefault": false,
+    "restrictedContentEnabled": false,
+    "color": "PURPLE",
+    "avatar": "3",
+    "createdAt": 1784426972789
+  },
+  {
+    "id": "e48a665a-d11e-4dc2-8980-4e8b4245aaf7",
+    "name": "Firestick",
+    "type": "ADULT",
+    "isAdmin": false,
+    "isDefault": true,
+    "color": "GREEN",
+    "avatar": "2",
+    "createdAt": 1788814835968,
+    "restrictedContentEnabled": false
+  }
+]

@@ -1,0 +1,10 @@
+title: RETRO HOMELAB
+background: https://images.unsplash.com/photo-1518770660439-4636190af475
+theme: dark
+color: slate
+headerStyle: clean
+target: _blank
+
+providers:
+  openweathermap: openweathermap
+  weatherapi: weatherapi

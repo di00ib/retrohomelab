@@ -1,0 +1,35 @@
+[
+  {
+    "collectionIds": [
+      "1fbca055e91ef25c7791881447cc25c6abfae15b:19079"
+    ],
+    "collectionNames": [
+      "Dungeons & Dragons"
+    ],
+    "contentCleared": false,
+    "contentRatings": [],
+    "customLogoPath": "user_f4c6af17-7c12-4c9a-90e6-74efb3884583.png",
+    "customMediaRatingKeys": [],
+    "decadeValues": [],
+    "displayNumberText": "2001",
+    "fallbackMediaRatingKeys": [],
+    "genreKeys": [],
+    "genreNames": [],
+    "genres": [],
+    "groupIds": [],
+    "isCustom": true,
+    "keywords": [],
+    "libraryIds": [],
+    "libraryNames": [],
+    "marathonsEnabled": false,
+    "name": "Dungeons & Dragons",
+    "number": 2001,
+    "playlistIds": [],
+    "playlistNames": [],
+    "rentModeEnabled": false,
+    "sortingMethod": "RANDOM",
+    "stableId": "user_f4c6af17-7c12-4c9a-90e6-74efb3884583",
+    "studios": [],
+    "type": "series"
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose *)",
+      "Bash(docker exec *)",
+      "Bash(curl -sk -D - -o /dev/null --max-time 5 -H 'Connection: close' https://firebat.taild1c700.ts.net/plex)",
+      "Bash(curl -sk -D - -o /dev/null --max-time 5 -H 'Connection: close' https://firebat.taild1c700.ts.net/plex/identity)",
+      "Bash(curl -sk --max-time 5 https://firebat.taild1c700.ts.net/plex/web/index.html)",
+      "Bash(mkdir -p /home/di0__0ib/homelab-docs)",
+      "Read(//home/di0__0ib/**)",
+      "Read(//mnt/pool/nextcloud-data/**)",
+      "Read(//mnt/pool/recovered/**)",
+      "Read(//mnt/pool/**)",
+      "Bash(dpkg -l)",
+      "Bash(sudo cat ~/.smbcreds/multitronic)",
+      "Read(//mnt/**)",
+      "Read(//etc/**)",
+      "Bash(systemctl is-active *)",
+      "Bash(systemctl is-enabled *)",
+      "Bash(sudo -n true)"
+    ]
+  }
+}

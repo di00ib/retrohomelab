@@ -1,0 +1,10 @@
+  dnd-app-host:
+    image: nginx:alpine
+    container_name: dnd-app-host
+    restart: unless-stopped
+    networks: [homelab]
+    ports:
+      - "7847:80"
+    volumes:
+      - /mnt/nvme1tb/retro-apps:/usr/share/nginx/html:ro
+

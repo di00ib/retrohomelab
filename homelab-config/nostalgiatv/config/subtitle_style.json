@@ -1,0 +1,9 @@
+{
+  "fontColor": "#FFFFFFFF",
+  "background": "SEMI_TRANSPARENT",
+  "bold": false,
+  "sizeScale": 1.0,
+  "fontFamily": "default",
+  "edgeStyle": "DROP_SHADOW",
+  "verticalOffsetPercent": 0
+}
