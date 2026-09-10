@@ -2,6 +2,10 @@
 .git
 .env*
 .github-sync.env*
+SESSION-HANDOFF.md
+**/SESSION-HANDOFF.md
+CLAUDE.md
+**/CLAUDE.md
 config/credentials.txt*
 **/credentials.txt*
 .megarc*

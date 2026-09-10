@@ -67,6 +67,17 @@ EXCLUDE_PATTERNS=(
   ".git"
   ".env*"
   ".github-sync.env*"
+  # Belt-and-suspenders, not because the copy on FIREBAT is known to contain
+  # real secrets today — it's a smaller/older fallback file and doesn't. But
+  # a much richer SESSION-HANDOFF.md living on MULTITRONIC (never touched by
+  # this script) DOES contain real credential values, and it would be an easy
+  # future mistake to copy/merge that richer file onto FIREBAT thinking it's
+  # an improvement. Excluding both filenames by name means that mistake can
+  # never leak here, regardless of which copy ends up in $HOMELAB_DIR.
+  "SESSION-HANDOFF.md"
+  "**/SESSION-HANDOFF.md"
+  "CLAUDE.md"
+  "**/CLAUDE.md"
   "config/credentials.txt*"
   "**/credentials.txt*"
   ".megarc*"
