@@ -29,7 +29,7 @@ A free, private blood pressure tracker that works on any device.
 
 This repository hosts the public-facing projects from my personal homelab (RETRO HOMELAB).
 
-The homelab itself runs on a FIREBAT A6 Mini PC with Ubuntu Server, Docker, Tailscale, and 19 self-hosted services. These public projects are the outward-facing pieces — free tools anyone can use, built and maintained as a hobby.
+The homelab itself runs on a MINISFORUM Mini PC with Ubuntu Server, Docker, Tailscale, and 19 self-hosted services. These public projects are the outward-facing pieces — free tools anyone can use, built and maintained as a hobby.
 
 **Stack:** HTML · CSS · JavaScript · Python · Docker · Tailscale · Cloudflare · GitHub Pages
 
